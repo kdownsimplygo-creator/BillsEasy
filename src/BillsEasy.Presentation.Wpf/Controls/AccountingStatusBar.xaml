@@ -1,0 +1,35 @@
+<UserControl x:Class="BillsEasy.Presentation.Wpf.Controls.AccountingStatusBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StatusBar Height="{StaticResource ControlHeightDense}">
+        <StatusBarItem>
+            <TextBlock Text="{Binding StatusMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       FontWeight="Medium" />
+        </StatusBarItem>
+
+        <StatusBarItem HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Company: " Foreground="{StaticResource TextMutedBrush}" />
+                <TextBlock Text="{Binding ActiveCompany, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Margin="0,0,12,0" />
+
+                <TextBlock Text="FY: " Foreground="{StaticResource TextMutedBrush}" />
+                <TextBlock Text="{Binding ActiveFinancialYear, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Margin="0,0,12,0" />
+
+                <TextBlock Text="User: " Foreground="{StaticResource TextMutedBrush}" />
+                <TextBlock Text="{Binding CurrentUser, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,0,12,0" />
+
+                <TextBlock Text="{Binding VersionTag, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Foreground="{StaticResource PrimaryBrandBrush}"
+                           FontWeight="SemiBold" />
+            </StackPanel>
+        </StatusBarItem>
+    </StatusBar>
+</UserControl>

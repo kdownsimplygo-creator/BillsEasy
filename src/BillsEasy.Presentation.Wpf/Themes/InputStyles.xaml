@@ -1,0 +1,135 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors="clr-namespace:BillsEasy.Presentation.Wpf.Behaviors">
+
+    <!-- Base Desktop Accounting TextBox Style -->
+    <Style TargetType="{x:Type TextBox}">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Height" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="Padding" Value="4,1" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderDarkBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="behaviors:KeyboardNavigationBehavior.AdvanceOnEnter" Value="True" />
+        <Setter Property="behaviors:SelectAllOnFocusBehavior.SelectAllOnFocus" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource ControlCornerRadius}"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource PrimaryBrandBrush}" />
+                        </Trigger>
+                        <!-- High-Visibility Active Focus Indicator -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ActiveFieldBorderBrush}" />
+                            <Setter Property="BorderThickness" TargetName="border" Value="1.5" />
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource ActiveFieldBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsReadOnly" Value="True">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource SurfaceDisabledBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource BorderMediumBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource SurfaceDisabledBrush}" />
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource BorderLightBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextDisabledBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Multiline Remarks / Notes TextBox Style -->
+    <Style x:Key="MultilineTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="Height" Value="Auto" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
+
+    <!-- Numeric & Amount TextBox Style (Tabular Numeral Alignment) -->
+    <Style x:Key="NumericTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="FontFamily" Value="{StaticResource MonospaceFontFamily}" />
+        <Setter Property="TextAlignment" Value="Right" />
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+    </Style>
+
+    <!-- Read-Only Display Box Style -->
+    <Style x:Key="ReadOnlyFieldStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Background" Value="#F8FAFC" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderMediumBrush}" />
+    </Style>
+
+    <!-- Base ComboBox Style with Focus Highlighting -->
+    <Style TargetType="{x:Type ComboBox}">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Height" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="Padding" Value="4,1" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderDarkBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="behaviors:KeyboardNavigationBehavior.AdvanceOnEnter" Value="True" />
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource ActiveFieldBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1.5" />
+                <Setter Property="Background" Value="{StaticResource ActiveFieldBackgroundBrush}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrandBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Base CheckBox Style -->
+    <Style TargetType="{x:Type CheckBox}">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="behaviors:KeyboardNavigationBehavior.AdvanceOnEnter" Value="True" />
+    </Style>
+
+    <!-- Base RadioButton Style -->
+    <Style TargetType="{x:Type RadioButton}">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,2,8,2" />
+    </Style>
+
+    <!-- Base DatePicker Style -->
+    <Style TargetType="{x:Type DatePicker}">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Height" Value="{StaticResource ControlHeightDense}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="behaviors:KeyboardNavigationBehavior.AdvanceOnEnter" Value="True" />
+    </Style>
+
+</ResourceDictionary>

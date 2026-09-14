@@ -1,0 +1,16 @@
+<UserControl x:Class="BillsEasy.Presentation.Wpf.Controls.AccountingSection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Margin="0,6,0,4">
+    <DockPanel LastChildFill="True">
+        <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   FontWeight="Bold"
+                   FontSize="{StaticResource FontSizeSmall}"
+                   Foreground="{StaticResource PrimaryBrandBrush}"
+                   VerticalAlignment="Center"
+                   Margin="0,0,8,0" />
+        <Separator Background="{StaticResource BorderLightBrush}"
+                   VerticalAlignment="Center"
+                   Height="1" />
+    </DockPanel>
+</UserControl>

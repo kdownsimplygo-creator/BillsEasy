@@ -1,0 +1,66 @@
+<UserControl x:Class="BillsEasy.Presentation.Wpf.Controls.AccountingDialogHeader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Margin="0,0,0,8">
+    <Border Background="{StaticResource SurfaceSubtleBrush}"
+            BorderBrush="{StaticResource BorderMediumBrush}"
+            BorderThickness="1"
+            Padding="10,6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Row 0: App Name & Company Context -->
+            <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,4">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="BillsEasy" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}" Foreground="{StaticResource PrimaryBrandBrush}" />
+                    <TextBlock Text=" • Native Accounting" Style="{StaticResource HelperTextStyle}" Margin="4,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <TextBlock DockPanel.Dock="Right"
+                           Text="{Binding CompanyContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeSmall}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding CompanyContextVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            </DockPanel>
+
+            <!-- Row 1: Screen Title & Subtitle -->
+            <DockPanel Grid.Row="1" LastChildFill="True">
+                <ContentPresenter DockPanel.Dock="Right"
+                                  Content="{Binding HeaderRightContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  VerticalAlignment="Center" />
+
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   FontWeight="Bold"
+                                   FontSize="{StaticResource FontSizeHeader}"
+                                   Foreground="{StaticResource TextPrimaryBrush}" />
+
+                        <Border Visibility="{Binding EntityBadgeVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                Background="{StaticResource InfoBackgroundBrush}"
+                                BorderBrush="{StaticResource BorderLightBrush}"
+                                BorderThickness="1"
+                                Padding="5,0"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding EntityBadge, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource PrimaryBrandBrush}" />
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Style="{StaticResource HelperTextStyle}"
+                               Visibility="{Binding SubtitleVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Margin="0,1,0,0" />
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </Border>
+</UserControl>

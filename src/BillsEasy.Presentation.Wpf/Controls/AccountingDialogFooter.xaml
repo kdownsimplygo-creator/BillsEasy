@@ -1,0 +1,59 @@
+<UserControl x:Class="BillsEasy.Presentation.Wpf.Controls.AccountingDialogFooter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Margin="0,6,0,0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Validation / Error Message Strip -->
+        <Border Grid.Row="0"
+                Visibility="{Binding ErrorMessageVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Background="{StaticResource ErrorBackgroundBrush}"
+                BorderBrush="{StaticResource ErrorBrush}"
+                BorderThickness="1"
+                Padding="8,3"
+                Margin="0,0,0,6">
+            <DockPanel LastChildFill="True">
+                <TextBlock Text="⚠" Foreground="{StaticResource ErrorBrush}" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ErrorMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{StaticResource ErrorBannerStyle}"
+                           VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Footer Action & Shortcut Strip -->
+        <Border Grid.Row="1"
+                Background="{StaticResource ShortcutBarBackgroundBrush}"
+                BorderBrush="{StaticResource BorderMediumBrush}"
+                BorderThickness="1"
+                Padding="8,4">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <ContentPresenter Content="{Binding StatusContent, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                    <TextBlock Text="{Binding ShortcutLegend, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               FontSize="{StaticResource FontSizeSmall}"
+                               FontWeight="Medium"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <Button Content="{Binding SaveButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinWidth="100" Height="{StaticResource ButtonHeightDense}"
+                            Margin="0,0,6,0"
+                            IsDefault="True"
+                            Command="{Binding SaveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                    <Button Content="{Binding CancelButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            MinWidth="80" Height="{StaticResource ButtonHeightDense}"
+                            IsCancel="True"
+                            Click="CancelButton_Click" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

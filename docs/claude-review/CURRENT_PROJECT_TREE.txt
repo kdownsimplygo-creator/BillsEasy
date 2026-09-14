@@ -1,0 +1,148 @@
+﻿================================================================================
+BILLSEASY — CURRENT PROJECT TREE (PHASES 1.1 - 1.4 COMPLETE)
+================================================================================
+Directory of W:\BillsEasy:
+
+W:\BillsEasy\
+├── .gitignore
+├── BillsEasy.sln
+├── run.bat
+├── docs\
+│   ├── ACCOUNTING_ENGINE_CONSTRAINTS.md
+│   ├── ARCHITECTURE.md
+│   ├── AUDIT_TRAIL.md
+│   ├── DATABASE_DESIGN.md
+│   ├── DECISION_LOG.md
+│   ├── DEVELOPMENT_ENVIRONMENT.md
+│   ├── DOMAIN_MODEL.md
+│   ├── MASTER_PROJECT_CHARTER.md
+│   ├── MODULE_BOUNDARIES.md
+│   ├── PHASE_1_1_IMPLEMENTATION_REPORT.md
+│   ├── PHASE_1_2_ARCHITECTURE_GATE.md
+│   ├── PHASE_1_2_IMPLEMENTATION_REPORT.md
+│   ├── PHASE_1_3_IMPLEMENTATION_REPORT.md
+│   ├── PHASE_1_4_IMPLEMENTATION_REPORT.md
+│   ├── REFERENCE_SOFTWARE.md
+│   ├── REFERENCE_SOURCES.md
+│   ├── SECURITY_MODEL.md
+│   ├── SOURCE_PROVENANCE.md
+│   ├── TECHNOLOGY_NOTES.md
+│   ├── UI_ARCHITECTURE.md
+│   └── claude-review\
+├── src\
+│   ├── BillsEasy.Domain\
+│   │   ├── BillsEasy.Domain.csproj
+│   │   ├── Common\
+│   │   │   ├── AuditableEntity.cs
+│   │   │   ├── DomainException.cs
+│   │   │   ├── Entity.cs
+│   │   │   └── IAuditableEntity.cs
+│   │   ├── Entities\
+│   │   │   ├── AccountGroup.cs
+│   │   │   ├── Company.cs
+│   │   │   ├── FinancialYear.cs
+│   │   │   └── Ledger.cs
+│   │   ├── Enums\
+│   │   │   ├── DebitCreditType.cs
+│   │   │   ├── GroupNature.cs
+│   │   │   └── GSTRegistrationType.cs
+│   │   └── ValueObjects\
+│   │       └── Money.cs
+│   ├── BillsEasy.Application\
+│   │   ├── BillsEasy.Application.csproj
+│   │   ├── Common\
+│   │   │   ├── IndianStates.cs
+│   │   │   └── Interfaces\
+│   │   │       ├── IAccountGroupRepository.cs
+│   │   │       ├── IAccountGroupService.cs
+│   │   │       ├── ICompanyContextService.cs
+│   │   │       ├── ICompanyRepositories.cs
+│   │   │       ├── ICurrentUserService.cs
+│   │   │       ├── IDateTimeProvider.cs
+│   │   │       ├── ILedgerRepository.cs
+│   │   │       ├── ILedgerService.cs
+│   │   │       └── ISqliteDbConnectionFactory.cs
+│   │   ├── DTOs\
+│   │   │   ├── AccountGroupDtos.cs
+│   │   │   ├── CompanyDtos.cs
+│   │   │   └── LedgerDtos.cs
+│   │   └── Services\
+│   │       ├── AccountGroupService.cs
+│   │       ├── CompanyService.cs
+│   │       ├── FinancialYearService.cs
+│   │       └── LedgerService.cs
+│   ├── BillsEasy.Infrastructure\
+│   │   ├── BillsEasy.Infrastructure.csproj
+│   │   ├── Persistence\
+│   │   │   ├── DatabaseInitializer.cs
+│   │   │   ├── SqliteConnectionFactory.cs
+│   │   │   └── Repositories\
+│   │   │       ├── AccountGroupRepository.cs
+│   │   │       ├── CompanyRepository.cs
+│   │   │       ├── FinancialYearRepository.cs
+│   │   │       └── LedgerRepository.cs
+│   │   └── Services\
+│   │       ├── CompanyContextService.cs
+│   │       └── DateTimeProvider.cs
+│   └── BillsEasy.Presentation.Wpf\
+│       ├── App.xaml
+│       ├── App.xaml.cs
+│       ├── AssemblyInfo.cs
+│       ├── BillsEasy.Presentation.Wpf.csproj
+│       ├── MainWindow.xaml
+│       ├── MainWindow.xaml.cs
+│       ├── ViewModels\
+│       │   ├── AccountGroupEditViewModel.cs
+│       │   ├── AccountGroupListViewModel.cs
+│       │   ├── CompanyEditViewModel.cs
+│       │   ├── CompanyListViewModel.cs
+│       │   ├── FinancialYearManagementViewModel.cs
+│       │   ├── LedgerEditViewModel.cs
+│       │   ├── LedgerListViewModel.cs
+│       │   ├── MainWindowViewModel.cs
+│       │   └── ViewModelBase.cs
+│       └── Views\
+│           ├── Company\
+│           │   ├── CompanyEditDialog.xaml
+│           │   ├── CompanyEditDialog.xaml.cs
+│           │   ├── CompanyListDialog.xaml
+│           │   ├── CompanyListDialog.xaml.cs
+│           │   ├── FinancialYearManagementDialog.xaml
+│           │   └── FinancialYearManagementDialog.xaml.cs
+│           └── Masters\
+│               ├── AccountGroupEditDialog.xaml
+│               ├── AccountGroupEditDialog.xaml.cs
+│               ├── AccountGroupManagementDialog.xaml
+│               ├── AccountGroupManagementDialog.xaml.cs
+│               ├── LedgerEditDialog.xaml
+│               ├── LedgerEditDialog.xaml.cs
+│               ├── LedgerManagementDialog.xaml
+│               └── LedgerManagementDialog.xaml.cs
+└── tests\
+    ├── BillsEasy.UnitTests\
+    │   ├── BillsEasy.UnitTests.csproj
+    │   ├── Application\
+    │   │   └── Services\
+    │   │       ├── AccountGroupServiceTests.cs
+    │   │       ├── CompanyServiceTests.cs
+    │   │       ├── FinancialYearServiceTests.cs
+    │   │       └── LedgerServiceTests.cs
+    │   └── Domain\
+    │       ├── Common\
+    │       │   └── AuditableEntityTests.cs
+    │       ├── Entities\
+    │       │   ├── AccountGroupTests.cs
+    │       │   ├── CompanyTests.cs
+    │       │   ├── FinancialYearTests.cs
+    │       │   └── LedgerTests.cs
+    │       └── ValueObjects\
+    │           └── MoneyTests.cs
+    └── BillsEasy.IntegrationTests\
+        ├── BillsEasy.IntegrationTests.csproj
+        └── Infrastructure\
+            └── Persistence\
+                ├── AccountGroupRepositoryTests.cs
+                ├── CompanyRepositoryTests.cs
+                ├── FinancialYearRepositoryTests.cs
+                ├── LedgerRepositoryTests.cs
+                └── SqliteConnectionFactoryTests.cs

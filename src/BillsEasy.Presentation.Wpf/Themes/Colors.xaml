@@ -1,0 +1,75 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Primary Base Surfaces -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F1F5F9" />
+    <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SurfaceSubtleBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F1F5F9" />
+    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#E0E7FF" />
+    <SolidColorBrush x:Key="SurfaceDisabledBrush" Color="#F3F4F6" />
+
+    <!-- Active Field Focus Indicators (Instant Keystroke Orientation) -->
+    <SolidColorBrush x:Key="ActiveFieldBackgroundBrush" Color="#FFFEE6" />
+    <SolidColorBrush x:Key="ActiveFieldBorderBrush" Color="#1E3A8A" />
+
+    <!-- Borders & Dividers -->
+    <SolidColorBrush x:Key="BorderLightBrush" Color="#E2E8F0" />
+    <SolidColorBrush x:Key="BorderMediumBrush" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="BorderDarkBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="BorderFocusBrush" Color="#1E3A8A" />
+
+    <!-- Section Rules & Headings -->
+    <SolidColorBrush x:Key="SectionHeaderBrush" Color="#1E3A8A" />
+    <SolidColorBrush x:Key="SectionLineBrush" Color="#CBD5E1" />
+
+    <!-- Typography Brushes -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B" />
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="#FFFFFF" />
+
+    <!-- Brand / Accounting Theme Accents -->
+    <SolidColorBrush x:Key="PrimaryBrandBrush" Color="#1E3A8A" />
+    <SolidColorBrush x:Key="PrimaryBrandHoverBrush" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="PrimaryBrandPressedBrush" Color="#172554" />
+    <SolidColorBrush x:Key="SecondaryBrandBrush" Color="#334155" />
+    <SolidColorBrush x:Key="SecondaryBrandHoverBrush" Color="#475569" />
+
+    <!-- Functional / Status Colors -->
+    <SolidColorBrush x:Key="SuccessBrush" Color="#15803D" />
+    <SolidColorBrush x:Key="SuccessBackgroundBrush" Color="#DCFCE7" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
+    <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#FEF3C7" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#B91C1C" />
+    <SolidColorBrush x:Key="ErrorBackgroundBrush" Color="#FEE2E2" />
+    <SolidColorBrush x:Key="InfoBrush" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="InfoBackgroundBrush" Color="#DBEAFE" />
+
+    <!-- Accounting Debit / Credit Semantics -->
+    <SolidColorBrush x:Key="DebitBrush" Color="#166534" />
+    <SolidColorBrush x:Key="CreditBrush" Color="#991B1B" />
+    <SolidColorBrush x:Key="DebitBackgroundBrush" Color="#EFF6FF" />
+    <SolidColorBrush x:Key="CreditBackgroundBrush" Color="#FFFBEB" />
+
+    <!-- Accounting Shell & Chrome Surfaces -->
+    <SolidColorBrush x:Key="ShellHeaderBackgroundBrush" Color="#0F2744" />
+    <SolidColorBrush x:Key="ShellHeaderForegroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ShellContextForegroundBrush" Color="#93C5FD" />
+    <SolidColorBrush x:Key="MenuBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="MenuBorderBrush" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#E2E8F0" />
+    <SolidColorBrush x:Key="StatusBarTextBrush" Color="#334155" />
+    <SolidColorBrush x:Key="ShortcutBarBackgroundBrush" Color="#EAEFF5" />
+    <SolidColorBrush x:Key="ShortcutKeyBadgeBackgroundBrush" Color="#DCEBF7" />
+    <SolidColorBrush x:Key="ShortcutKeyForegroundBrush" Color="#0F2744" />
+
+    <!-- DataGrid Professional Accounting Theme -->
+    <SolidColorBrush x:Key="GridHeaderBackgroundBrush" Color="#EAEFF5" />
+    <SolidColorBrush x:Key="GridHeaderBorderBrush" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="GridAlternateRowBackgroundBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="GridSelectedRowBackgroundBrush" Color="#DCEBF7" />
+    <SolidColorBrush x:Key="GridSelectedRowForegroundBrush" Color="#0F172A" />
+
+</ResourceDictionary>
