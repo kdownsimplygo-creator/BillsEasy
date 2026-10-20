@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using BillsEasy.Application.Common.Interfaces;
+using BillsEasy.Application.DTOs;
+using BillsEasy.Application.Services;
+using BillsEasy.Domain.Common;
 using BillsEasy.Domain.Entities;
 using BillsEasy.Domain.Enums;
 using BillsEasy.Domain.ValueObjects;
 using BillsEasy.Infrastructure.Persistence;
 using BillsEasy.Infrastructure.Persistence.Repositories;
+using BillsEasy.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Xunit;
@@ -203,6 +203,64 @@ public class LedgerRepositoryTests : IDisposable
 
         var remaining = await _ledgerRepository.GetAllAsync(company.Id);
         remaining.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task TD01_UpdateOpeningBalance_WhenLedgerHasVouchers_ThrowsDomainExceptionAndBlocksUpdate()
+    {
+        await _initializer.InitializeAsync();
+        var (company, group) = await CreateCompanyAndGroupAsync();
+        var fy = company.FinancialYears.First();
+
+        var ledger = Ledger.Create(company.Id, group.Id, "Party A", openingBalance: 1000m);
+        ledger.CreatedAt = DateTime.UtcNow;
+        ledger.CreatedBy = "tester";
+        await _ledgerRepository.AddAsync(ledger);
+
+        var offsettingLedger = Ledger.Create(company.Id, group.Id, "Party B");
+        offsettingLedger.CreatedAt = DateTime.UtcNow;
+        offsettingLedger.CreatedBy = "tester";
+        await _ledgerRepository.AddAsync(offsettingLedger);
+
+        // Prior to vouchers, HasTransactionsAsync returns false
+        var hasTxBefore = await _ledgerRepository.HasTransactionsAsync(company.Id, ledger.Id);
+        hasTxBefore.Should().BeFalse();
+
+        // Post a real voucher referencing ledger in VoucherLines
+        var voucherRepo = new VoucherRepository(_connectionFactory);
+        var voucher = Voucher.Create(company.Id, fy.Id, "JV-01", VoucherType.Journal, new DateOnly(2024, 5, 1));
+        voucher.AddLine(ledger.Id, DebitCreditType.Debit, new Money(500m));
+        voucher.AddLine(offsettingLedger.Id, DebitCreditType.Credit, new Money(500m));
+        voucher.Post(fy);
+        await voucherRepo.AddAsync(voucher);
+
+        // HasTransactionsAsync must now return true
+        var hasTxAfter = await _ledgerRepository.HasTransactionsAsync(company.Id, ledger.Id);
+        hasTxAfter.Should().BeTrue();
+
+        // Instantiate real LedgerService
+        var userService = new StandaloneCurrentUserService();
+        var dateProvider = new DateTimeProvider();
+        var ledgerService = new LedgerService(_ledgerRepository, _accountGroupRepository, userService, dateProvider);
+
+        // Attempting to update OpeningBalance via LedgerService must throw DomainException
+        var updateDto = new UpdateLedgerDto(
+            ledger.Id,
+            company.Id,
+            group.Id,
+            ledger.Name,
+            ledger.PrintName,
+            null,
+            2000m, // modified opening balance
+            DebitCreditType.Debit,
+            false,
+            null,
+            null,
+            null, null, null, null, null, null, "India", null, GSTRegistrationType.Regular, null, null, null, null, null, null, null, null, null, null);
+
+        var act = async () => await ledgerService.UpdateLedgerAsync(updateDto);
+        await act.Should().ThrowAsync<DomainException>()
+            .WithMessage("*Cannot modify Opening Balance for a ledger that has recorded transaction history / vouchers*");
     }
 
     public void Dispose()

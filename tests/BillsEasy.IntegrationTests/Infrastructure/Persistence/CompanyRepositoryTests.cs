@@ -2,10 +2,15 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using BillsEasy.Application.Common.Interfaces;
+using BillsEasy.Application.Services;
+using BillsEasy.Domain.Common;
 using BillsEasy.Domain.Entities;
 using BillsEasy.Domain.Enums;
+using BillsEasy.Domain.ValueObjects;
 using BillsEasy.Infrastructure.Persistence;
 using BillsEasy.Infrastructure.Persistence.Repositories;
+using BillsEasy.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Xunit;
@@ -170,21 +175,13 @@ public class CompanyRepositoryTests : IDisposable
         var hasTxBefore = await _companyRepository.HasTransactionsAsync(company.Id);
         hasTxBefore.Should().BeFalse();
 
-        // Simulate Phase 1.5 Voucher table creation and record insertion
+        // Simulate voucher insertion in authoritative Vouchers table
         await using (var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync())
         {
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Vouchers (
-                    Id TEXT PRIMARY KEY,
-                    CompanyId TEXT NOT NULL,
-                    FinancialYearId TEXT NOT NULL,
-                    VoucherType INTEGER NOT NULL,
-                    FOREIGN KEY (FinancialYearId) REFERENCES FinancialYears(Id) ON DELETE RESTRICT
-                );
-
-                INSERT INTO Vouchers (Id, CompanyId, FinancialYearId, VoucherType)
-                VALUES (@VoucherId, @CompanyId, @FinancialYearId, 1);
+                INSERT INTO Vouchers (Id, CompanyId, FinancialYearId, VoucherNumber, Type, Status, VoucherDate, TotalAmount, CreatedAt, CreatedBy)
+                VALUES (@VoucherId, @CompanyId, @FinancialYearId, 'V-TEST-001', 1, 2, '2026-04-15', 10000, '2026-04-15T00:00:00Z', 'test');
             ";
             cmd.Parameters.AddWithValue("@VoucherId", Guid.NewGuid().ToString());
             cmd.Parameters.AddWithValue("@CompanyId", company.Id.ToString());
@@ -210,6 +207,113 @@ public class CompanyRepositoryTests : IDisposable
             await act.Should().ThrowAsync<SqliteException>()
                 .Where(ex => ex.SqliteErrorCode == 19);
         }
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenTransactionInsertedBetweenCheckAndDelete_AtomicallyBlocksDeletion()
+    {
+        await _initializer.InitializeAsync();
+
+        var company = Company.Create(
+            companyName: "Race Guard Co",
+            printName: "Race Guard Co",
+            shortName: "RGC",
+            stateName: "Gujarat",
+            stateCode: "24",
+            financialYearBeginning: new DateOnly(2026, 4, 1),
+            booksBeginningFrom: new DateOnly(2026, 4, 1));
+
+        await _companyRepository.AddAsync(company);
+        var fy = company.FinancialYears.First();
+
+        // Step 1: Simulate the check phase in CompanyService — HasTransactionsAsync returns false
+        var hasTx = await _companyRepository.HasTransactionsAsync(company.Id);
+        hasTx.Should().BeFalse("initial check sees zero transactions");
+
+        // Step 2: Simulate concurrent insertion of a voucher before DeleteAsync runs
+        await using (var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync())
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO Vouchers (Id, CompanyId, FinancialYearId, VoucherNumber, Type, Status, VoucherDate, TotalAmount, CreatedAt, CreatedBy)
+                VALUES (@VoucherId, @CompanyId, @FinancialYearId, 'V-RACE-001', 1, 2, '2026-04-15', 10000, '2026-04-15T00:00:00Z', 'test');
+            ";
+            cmd.Parameters.AddWithValue("@VoucherId", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@CompanyId", company.Id.ToString());
+            cmd.Parameters.AddWithValue("@FinancialYearId", fy.Id.ToString());
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // Step 3: Call DeleteAsync — must detect the transaction atomically inside its transaction and throw DomainException
+        Func<Task> act = async () => await _companyRepository.DeleteAsync(company.Id);
+
+        await act.Should().ThrowAsync<DomainException>()
+            .WithMessage("*Cannot delete company 'Race Guard Co' because it has one or more recorded financial transactions*");
+
+        // Step 4: Verify company still exists
+        var retained = await _companyRepository.GetByIdAsync(company.Id);
+        retained.Should().NotBeNull("company record must not be deleted when transactions exist");
+    }
+
+    [Fact]
+    public async Task TD02_CompanyService_DeleteCompanyAsync_WhenRealVoucherExists_ThrowsDomainExceptionAndPreservesCompanyAndFY()
+    {
+        await _initializer.InitializeAsync();
+
+        var company = Company.Create(
+            companyName: "TD02 Protection Co",
+            printName: "TD02 Protection Co",
+            shortName: "TD02",
+            stateName: "Gujarat",
+            stateCode: "24",
+            financialYearBeginning: new DateOnly(2026, 4, 1),
+            booksBeginningFrom: new DateOnly(2026, 4, 1));
+
+        await _companyRepository.AddAsync(company);
+        var fy = company.FinancialYears.First();
+
+        var groupRepo = new AccountGroupRepository(_connectionFactory);
+        var ledgerRepo = new LedgerRepository(_connectionFactory);
+        var voucherRepo = new VoucherRepository(_connectionFactory);
+        var fyRepo = new FinancialYearRepository(_connectionFactory);
+
+        var assetGroup = AccountGroup.Create(company.Id, "Liquid Assets", GroupNature.Asset, isPrimary: true);
+        var incomeGroup = AccountGroup.Create(company.Id, "Direct Income", GroupNature.Income, isPrimary: true);
+        await groupRepo.AddAsync(assetGroup);
+        await groupRepo.AddAsync(incomeGroup);
+
+        var cashLedger = Ledger.Create(company.Id, assetGroup.Id, "Cash in Till");
+        var salesLedger = Ledger.Create(company.Id, incomeGroup.Id, "General Sales");
+        await ledgerRepo.AddAsync(cashLedger);
+        await ledgerRepo.AddAsync(salesLedger);
+
+        // Post a real financial voucher
+        var voucher = Voucher.Create(company.Id, fy.Id, "TD02-VCH-01", VoucherType.Receipt, new DateOnly(2026, 4, 15));
+        voucher.AddLine(cashLedger.Id, DebitCreditType.Debit, new Money(5000m));
+        voucher.AddLine(salesLedger.Id, DebitCreditType.Credit, new Money(5000m));
+        voucher.Post(fy);
+        await voucherRepo.AddAsync(voucher);
+
+        // Instantiate CompanyService
+        var userService = new StandaloneCurrentUserService();
+        var dateProvider = new DateTimeProvider();
+        var companyService = new CompanyService(_companyRepository, fyRepo, userService, dateProvider);
+
+        // DeleteCompanyAsync must detect transaction and throw DomainException
+        var act = async () => await companyService.DeleteCompanyAsync(company.Id);
+
+        await act.Should().ThrowAsync<DomainException>()
+            .WithMessage("*Cannot delete company 'TD02 Protection Co' because it has one or more recorded financial transactions*");
+
+        // Verify company and financial year remain intact
+        var preservedCompany = await _companyRepository.GetByIdAsync(company.Id);
+        preservedCompany.Should().NotBeNull();
+
+        var preservedFys = await fyRepo.GetByCompanyIdAsync(company.Id);
+        preservedFys.Should().NotBeEmpty();
+
+        var preservedVoucher = await voucherRepo.GetByIdAsync(company.Id, voucher.Id);
+        preservedVoucher.Should().NotBeNull();
     }
 
     public void Dispose()

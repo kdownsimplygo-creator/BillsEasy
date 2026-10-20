@@ -1,0 +1,74 @@
+<Window x:Class="BillsEasy.Presentation.Wpf.Views.Purchase.TransportDetailsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:BillsEasy.Presentation.Wpf.Controls"
+        x:Name="TransportDialog"
+        Title="Transport Details (BUSY Class 8)"
+        Height="360" Width="520"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource WindowBackgroundBrush}"
+        ResizeMode="NoResize">
+    <Window.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=TransportDialog}" />
+        <KeyBinding Key="Escape" Command="{Binding SkipCommand}" CommandParameter="{Binding ElementName=TransportDialog}" />
+    </Window.InputBindings>
+
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <controls:AccountingDialogHeader Grid.Row="0"
+                                         Title="Transport Details"
+                                         Subtitle="Enter goods consignment, transport carrier, and vehicle tracking information."
+                                         EntityBadge="[Consignment]" />
+
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="16,12" Margin="0,8,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Transport / Carrier" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TransportName, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="GR / RR Number" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding GrRrNumber, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Transport Date" Style="{StaticResource FormLabelStyle}" />
+                <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding TransportDate}" Margin="{StaticResource FieldMarginDense}" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Vehicle Number" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding VehicleNumber, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Station / Place" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding StationFromPlace, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+            </Grid>
+        </Border>
+
+        <!-- Action Buttons -->
+        <Border Grid.Row="2" Padding="0,4,0,0">
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="F2 = Save | Esc = Skip" Foreground="#64748B" FontSize="{StaticResource FontSizeSmall}" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="_Save (F2)" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=TransportDialog}" Margin="0,0,8,0" />
+                    <Button Content="S_kip (Esc)" Style="{StaticResource SecondaryButtonStyle}" Command="{Binding SkipCommand}" CommandParameter="{Binding ElementName=TransportDialog}" Margin="0,0,8,0" />
+                    <Button Content="_Cancel" Style="{StaticResource SecondaryButtonStyle}" Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=TransportDialog}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

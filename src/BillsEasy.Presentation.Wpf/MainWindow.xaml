@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         x:Name="RootWindow"
         Title="{Binding Title}"
-        Height="700" Width="1060"
-        MinHeight="580" MinWidth="850"
-        Background="{StaticResource WindowBackgroundBrush}"
+        Height="850" Width="1320"
+        MinHeight="680" MinWidth="1100"
+        Background="#F1F5F9"
         WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
         <KeyBinding Gesture="Alt+N" Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
@@ -18,6 +18,12 @@
         <KeyBinding Gesture="Alt+F" Command="{Binding ManageFinancialYearsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
         <KeyBinding Gesture="Alt+G" Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
         <KeyBinding Gesture="Alt+L" Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+        <KeyBinding Gesture="Alt+U" Command="{Binding ManageUnitsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+        <KeyBinding Gesture="Alt+I" Command="{Binding ManageItemGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+        <KeyBinding Gesture="Alt+P" Command="{Binding ManageItemsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+        <KeyBinding Gesture="Alt+R" Command="{Binding RefreshDashboardCommand}" />
+        <KeyBinding Key="F9" Command="{Binding OpenPurchaseInvoiceCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+        <KeyBinding Gesture="Shift+F9" Command="{Binding OpenPurchaseListCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
     </Window.InputBindings>
 
     <Grid>
@@ -30,250 +36,757 @@
         </Grid.RowDefinitions>
 
         <!-- Top Menu Bar -->
-        <Menu Grid.Row="0">
-            <MenuItem Header="_Company">
-                <MenuItem Header="_Create Company..." Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+N" />
-                <MenuItem Header="_Open / Select Company..." Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+O" />
-                <MenuItem Header="_Modify Active Company..." Command="{Binding EditActiveCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" IsEnabled="{Binding HasActiveCompany}" InputGestureText="Alt+M" />
-                <Separator />
-                <MenuItem Header="_Manage Financial Years..." Command="{Binding ManageFinancialYearsCommand}" CommandParameter="{Binding ElementName=RootWindow}" IsEnabled="{Binding HasActiveCompany}" InputGestureText="Alt+F" />
-                <Separator />
-                <MenuItem Header="_Close Company" Command="{Binding CloseActiveCompanyCommand}" IsEnabled="{Binding HasActiveCompany}" />
-            </MenuItem>
-            <MenuItem Header="_Masters" IsEnabled="{Binding HasActiveCompany}">
-                <MenuItem Header="_Account Groups..." Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+G" />
-                <MenuItem Header="Accounts / _Ledgers..." Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+L" />
-            </MenuItem>
-            <MenuItem Header="_Vouchers (Phase 1.5 Frozen)">
-                <MenuItem Header="Payment Voucher (F5) [LOCKED]" IsEnabled="False" />
-                <MenuItem Header="Receipt Voucher (F6) [LOCKED]" IsEnabled="False" />
-                <MenuItem Header="Journal Voucher (F7) [LOCKED]" IsEnabled="False" />
-                <MenuItem Header="Sales Invoice (F8) [LOCKED]" IsEnabled="False" />
-                <MenuItem Header="Purchase Bill (F9) [LOCKED]" IsEnabled="False" />
-            </MenuItem>
-            <MenuItem Header="_Reports" IsEnabled="False">
-                <MenuItem Header="Day Book [Phase 1.8]" IsEnabled="False" />
-                <MenuItem Header="Trial Balance [Phase 1.8]" IsEnabled="False" />
-            </MenuItem>
-            <MenuItem Header="_Help">
-                <MenuItem Header="About BillsEasy" />
-            </MenuItem>
-        </Menu>
+        <Border Grid.Row="0" Background="{StaticResource ModernNavyHeaderBrush}" BorderThickness="0">
+            <Menu Background="Transparent" Foreground="#E2E8F0" Height="26">
+                <MenuItem Header="_Company" Foreground="#E2E8F0">
+                    <MenuItem Header="_Create Company..." Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+N" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="_Open / Select Company..." Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+O" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="_Modify Active Company..." Command="{Binding EditActiveCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" IsEnabled="{Binding HasActiveCompany}" InputGestureText="Alt+M" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <Separator />
+                    <MenuItem Header="_Manage Financial Years..." Command="{Binding ManageFinancialYearsCommand}" CommandParameter="{Binding ElementName=RootWindow}" IsEnabled="{Binding HasActiveCompany}" InputGestureText="Alt+F" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <Separator />
+                    <MenuItem Header="_Close Company" Command="{Binding CloseActiveCompanyCommand}" IsEnabled="{Binding HasActiveCompany}" Foreground="{StaticResource ErrorBrush}" />
+                </MenuItem>
+                <MenuItem Header="_Masters" IsEnabled="{Binding HasActiveCompany}" Foreground="#E2E8F0">
+                    <MenuItem Header="_Account Groups..." Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+G" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="Accounts / _Ledgers..." Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+L" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <Separator />
+                    <MenuItem Header="_Units of Measurement..." Command="{Binding ManageUnitsCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+U" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="Item _Groups..." Command="{Binding ManageItemGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+I" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="_Items (Stock Products)..." Command="{Binding ManageItemsCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Alt+P" Foreground="{StaticResource TextPrimaryBrush}" />
+                </MenuItem>
+                <MenuItem Header="_Transactions" IsEnabled="{Binding HasActiveCompany}" Foreground="#E2E8F0">
+                    <MenuItem Header="_Purchase Invoice..." Command="{Binding OpenPurchaseInvoiceCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="F9" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <MenuItem Header="Purchase _List / Register..." Command="{Binding OpenPurchaseListCommand}" CommandParameter="{Binding ElementName=RootWindow}" InputGestureText="Shift+F9" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <Separator />
+                    <MenuItem Header="Payment Voucher (F5) [Phase 2]" IsEnabled="False" Foreground="{StaticResource TextDisabledBrush}" />
+                    <MenuItem Header="Receipt Voucher (F6) [Phase 2]" IsEnabled="False" Foreground="{StaticResource TextDisabledBrush}" />
+                    <MenuItem Header="Journal Voucher (F7) [Phase 2]" IsEnabled="False" Foreground="{StaticResource TextDisabledBrush}" />
+                    <MenuItem Header="Sales Invoice (F8) [Phase 2]" IsEnabled="False" Foreground="{StaticResource TextDisabledBrush}" />
+                </MenuItem>
+                <MenuItem Header="_Reports" IsEnabled="False" Foreground="#94A3B8">
+                    <MenuItem Header="Day Book [Phase 2]" IsEnabled="False" />
+                    <MenuItem Header="Trial Balance [Phase 2]" IsEnabled="False" />
+                    <MenuItem Header="Stock Summary [Phase 2]" IsEnabled="False" />
+                </MenuItem>
+                <MenuItem Header="_Help" Foreground="#E2E8F0">
+                    <MenuItem Header="About BillsEasy" Foreground="{StaticResource TextPrimaryBrush}" />
+                </MenuItem>
+            </Menu>
+        </Border>
 
-        <!-- Executive Accounting Context Strip -->
-        <Border Grid.Row="1" Background="{StaticResource ShellHeaderBackgroundBrush}" Padding="14,6">
-            <DockPanel LastChildFill="True">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                    <TextBlock Text="BillsEasy" FontWeight="Bold" FontSize="{StaticResource FontSizeMedium}" Foreground="#FFFFFF" />
-                    <TextBlock Text=" | " Foreground="#64748B" Margin="6,0" />
-                    <TextBlock Text="Active Company: " Foreground="#94A3B8" FontSize="{StaticResource FontSizeBody}" />
-                    <TextBlock Text="{Binding ActiveCompanyText}" FontWeight="Bold" Foreground="#60A5FA" FontSize="{StaticResource FontSizeBody}" />
+        <!-- Top Application Enterprise Header (Navy Bar Matching Reference Design) -->
+        <Border Grid.Row="1" Background="{StaticResource ModernNavyHeaderBrush}" BorderBrush="#1E3A5F" BorderThickness="0,0,0,1" Padding="20,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="380" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Application Brand Identity -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="BillsEasy" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" />
+                        <TextBlock Text="Desktop Accounting" FontSize="13" Foreground="#94A3B8" Margin="8,4,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                    <TextBlock Text="FY: " Foreground="#94A3B8" FontSize="{StaticResource FontSizeBody}" />
-                    <TextBlock Text="{Binding ActiveFinancialYearText}" FontWeight="SemiBold" Foreground="#FFFFFF" FontSize="{StaticResource FontSizeBody}" Margin="0,0,16,0" />
-                    <TextBlock Text="User: system_admin" Foreground="#CBD5E1" FontSize="{StaticResource FontSizeBody}" Margin="0,0,16,0" />
-                    <Border Background="#1E3A8A" Padding="6,1" CornerRadius="1">
-                        <TextBlock Text="DESKTOP ACCOUNTING" FontSize="{StaticResource FontSizeSmall}" FontWeight="Bold" Foreground="#FFFFFF" />
-                    </Border>
+                <!-- Center: Dedicated Active Company Card Pill -->
+                <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Background="#13355C" BorderBrush="#1E4B82" BorderThickness="1" CornerRadius="8" Padding="14,6">
+                    <DockPanel LastChildFill="True">
+                        <Border Width="32" Height="32" CornerRadius="6" Background="#1E4B82" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconBuilding}" Fill="#93C5FD" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveCompanyText}" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" />
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding ActiveCompanyStateText}" FontSize="11" Foreground="#93C5FD" />
+                                <TextBlock Text="  |  " FontSize="11" Foreground="#64748B" Visibility="{Binding HasActiveCompany, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="● Books Active" FontSize="11" FontWeight="Bold" Foreground="#4ADE80" Visibility="{Binding HasActiveCompany, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="Select or Create a Company to begin" FontSize="11" Foreground="#94A3B8" Visibility="{Binding HasActiveCompany, Converter={StaticResource InverseBoolToVis}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Right: Financial Year & User Profile Identity -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <!-- FY Block -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+                        <Path Data="{StaticResource IconCalendar}" Fill="#93C5FD" Width="18" Height="18" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Financial Year" FontSize="10" Foreground="#94A3B8" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ActiveFinancialYearText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" />
+                                <Path Data="{StaticResource IconChevronDown}" Fill="#93C5FD" Width="10" Height="10" Stretch="Uniform" Margin="4,3,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding ActiveCompanyBooksBeginningText, StringFormat='Books From: {0}'}" FontSize="10" Foreground="#64748B" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- User Profile Block -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="30" Height="30" CornerRadius="15" Background="#1E4B82" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconUser}" Fill="#93C5FD" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="system_admin" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" />
+                            <TextBlock Text="Administrator" FontSize="10" Foreground="#94A3B8" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <!-- Main Accounting Workstation Workspace -->
-        <Grid Grid.Row="2" Margin="{StaticResource DialogPadding}">
+        <Grid Grid.Row="2" Margin="14,12,14,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="340" />
-                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel: Accounting Gateway Navigation -->
-            <Border Grid.Column="0" Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="12">
+            <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="12,10">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <!-- Gateway Header -->
-                        <Border Background="{StaticResource GridHeaderBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="8,4" Margin="0,0,0,10">
-                            <TextBlock Text="GATEWAY OF BILLSEASY" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}" Foreground="{StaticResource PrimaryBrandBrush}" HorizontalAlignment="Center" />
+                        <!-- Active Dashboard Pill -->
+                        <Border Background="{StaticResource ModernLightBlueBrush}" BorderBrush="{StaticResource ModernPrimaryBlueBrush}" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="{StaticResource IconDashboard}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="15" Height="15" Stretch="Uniform" Margin="0,0,10,0" />
+                                <TextBlock Text="Dashboard" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource ModernPrimaryBlueBrush}" />
+                            </StackPanel>
                         </Border>
 
-                        <!-- Company Section -->
-                        <controls:AccountingSection Title="COMPANY OPERATIONS" />
+                        <!-- Company Operations -->
+                        <TextBlock Text="COMPANY" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="6,4,0,6" />
                         <StackPanel Margin="0,0,0,10">
-                            <Button Content="_Open / Select Company (Alt+O)"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                            <Button Content="_Create New Company (Alt+N)"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                            <Button Content="_Modify Active Company (Alt+M)"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="{Binding HasActiveCompany}"
-                                    Command="{Binding EditActiveCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                            <Button Content="Manage _Financial Years (Alt+F)"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="{Binding HasActiveCompany}"
-                                    Command="{Binding ManageFinancialYearsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                            <Button Content="Close Active Company"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="{Binding HasActiveCompany}"
-                                    Command="{Binding CloseActiveCompanyCommand}" />
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+O" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconFolder}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Open / Select Company" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+N" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconPlusCircle}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Create New Company" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="{Binding HasActiveCompany}" Command="{Binding EditActiveCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+M" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconEdit}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Modify Active Company" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="{Binding HasActiveCompany}" Command="{Binding ManageFinancialYearsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+F" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconCalendar}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Manage _Financial Years" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="{Binding HasActiveCompany}" Command="{Binding CloseActiveCompanyCommand}">
+                                <DockPanel LastChildFill="True">
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconCloseCircle}" Fill="{StaticResource ErrorBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Close Active Company" Foreground="{StaticResource ErrorBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
                         </StackPanel>
 
                         <!-- Masters Section -->
-                        <controls:AccountingSection Title="CHART OF ACCOUNTS &amp; MASTERS" />
+                        <TextBlock Text="MASTERS" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="6,4,0,6" />
                         <StackPanel Margin="0,0,0,10" IsEnabled="{Binding HasActiveCompany}">
-                            <Button Content="Account _Groups Master (Alt+G)"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                            <Button Content="Accounts / _Ledgers Master (Alt+L)"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+G" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconHierarchy}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Account _Groups" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+L" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconUsers}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Accounts / _Ledgers" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ManageUnitsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+U" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconRuler}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Units of Measurement" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ManageItemGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+I" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconFolder}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Item _Groups" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ManageItemsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Alt+P" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconBox}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Items (Stock Catalog)" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </Button>
                         </StackPanel>
 
-                        <!-- Vouchers & Transactions (Phase 1.5 Frozen) -->
-                        <controls:AccountingSection Title="VOUCHER OPERATIONS (PHASE 1.5 — FROZEN)" />
+                        <!-- Transactions Section -->
+                        <TextBlock Text="TRANSACTIONS" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="6,4,0,6" />
+                        <StackPanel Margin="0,0,0,10" IsEnabled="{Binding HasActiveCompany}">
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding OpenPurchaseInvoiceCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="{StaticResource ModernLightBlueBrush}" CornerRadius="3" Padding="6,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="F9" FontSize="10" FontWeight="Bold" Foreground="{StaticResource ModernPrimaryBlueBrush}" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconCart}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="_Purchase Bill" FontWeight="SemiBold" Foreground="{StaticResource ModernPrimaryBlueBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding OpenPurchaseListCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                <DockPanel LastChildFill="True">
+                                    <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="3" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="Shift+F9" FontSize="10" Foreground="#64748B" FontWeight="SemiBold" />
+                                    </Border>
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconInvoiceSearch}" Fill="#64748B" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Purchase _Register" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False" ToolTip="Backend accounting logic validated (Class 4). Dedicated entry UI scheduled for Phase 2.">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconRupee}" Fill="{StaticResource TextDisabledBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Payment Voucher  F5" Foreground="{StaticResource TextDisabledBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False" ToolTip="Backend accounting logic validated (Class 5). Dedicated entry UI scheduled for Phase 2.">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconReceipt}" Fill="{StaticResource TextDisabledBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Receipt Voucher  F6" Foreground="{StaticResource TextDisabledBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False" ToolTip="Backend accounting logic validated (Class 6). Dedicated entry UI scheduled for Phase 2.">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconJournal}" Fill="{StaticResource TextDisabledBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Journal Voucher  F7" Foreground="{StaticResource TextDisabledBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False" ToolTip="Sales Invoice voucher engine scheduled for subsequent implementation class.">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <Path DockPanel.Dock="Left" Data="{StaticResource IconInvoicePlus}" Fill="{StaticResource TextDisabledBrush}" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Sales Invoice  F8" Foreground="{StaticResource TextDisabledBrush}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Reports Section -->
+                        <TextBlock Text="REPORTS" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="6,4,0,6" />
                         <StackPanel Margin="0,0,0,4">
-                            <Button Content="Payment Voucher (F5)  🔒"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="False" />
-                            <Button Content="Receipt Voucher (F6)  🔒"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="False" />
-                            <Button Content="Sales Invoice (F8)  🔒"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="False" />
-                            <Button Content="Purchase Bill (F9)  🔒"
-                                    HorizontalContentAlignment="Left" Padding="10,2" Margin="0,0,0,4"
-                                    IsEnabled="False" />
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Day Book" Foreground="{StaticResource TextDisabledBrush}" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Trial Balance" Foreground="{StaticResource TextDisabledBrush}" />
+                                </DockPanel>
+                            </Button>
+                            <Button Style="{StaticResource NavButtonStyle}" IsEnabled="False">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="(Phase 2)" FontSize="10" Foreground="{StaticResource TextDisabledBrush}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Stock Summary" Foreground="{StaticResource TextDisabledBrush}" />
+                                </DockPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
 
             <!-- Right Panel: Active Company Workstation or No-Company Prompt -->
-            <Border Grid.Column="2" Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="16">
-                <Grid>
-                    <!-- View A: Company Active Workstation -->
-                    <Grid Visibility="{Binding HasActiveCompany, Converter={StaticResource BoolToVis}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <!-- Active Company Header Banner -->
-                        <Border Grid.Row="0" Background="{StaticResource GridHeaderBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10" Margin="0,0,0,12">
-                            <DockPanel LastChildFill="True">
-                                <StackPanel DockPanel.Dock="Left">
-                                    <TextBlock Text="{Binding ActiveCompanyText}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBrandBrush}" />
-                                    <TextBlock Text="{Binding ActiveFinancialYearText, StringFormat='Financial Year: {0}'}" Style="{StaticResource HelperTextStyle}" FontWeight="SemiBold" Margin="0,3,0,0" />
+            <Grid Grid.Column="2">
+                <!-- View A: Company Active Workstation -->
+                <ScrollViewer Visibility="{Binding HasActiveCompany, Converter={StaticResource BoolToVis}}"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,4,0">
+                        <!-- Dashboard Title Bar -->
+                        <DockPanel LastChildFill="True" Margin="0,0,0,14">
+                            <Button DockPanel.Dock="Right"
+                                    Command="{Binding RefreshDashboardCommand}"
+                                    Style="{StaticResource NavButtonStyle}"
+                                    Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1"
+                                    Padding="12,5" Height="32" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource IconRefresh}" Fill="#334155" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Refresh (Alt+R)" FontWeight="SemiBold" FontSize="12" Foreground="#334155" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <Border DockPanel.Dock="Right" Background="{StaticResource SuccessBackgroundBrush}" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" Padding="10,3" VerticalAlignment="Center">
-                                    <TextBlock Text="● BOOKS ACTIVE" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}" Foreground="{StaticResource SuccessBrush}" />
-                                </Border>
-                            </DockPanel>
-                        </Border>
+                            </Button>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="{StaticResource IconDashboard}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="22" Height="22" Stretch="Uniform" Margin="0,0,10,0" VerticalAlignment="Center" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Dashboard" FontSize="18" FontWeight="Bold" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                    <TextBlock Text="Overview of your business at a glance" FontSize="12" Foreground="{StaticResource ModernTextSecondaryBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
 
-                        <!-- Workstation Operations Strip -->
-                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                            <controls:AccountingSection Title="WORKSTATION MASTER SHORTCUTS" />
-                            <Grid Margin="0,4,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="10" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                        <!-- Financial Position Summary Cards (Row 1) -->
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" Background="{StaticResource SurfaceSubtleBrush}" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Padding="12,10">
-                                    <StackPanel>
-                                        <TextBlock Text="Accounts / Ledgers Master (Alt+L)" FontWeight="Bold" Foreground="{StaticResource PrimaryBrandBrush}" />
-                                        <TextBlock Text="Manage customers, vendors, bank accounts, and statutory tax ledgers." Style="{StaticResource HelperTextStyle}" Margin="0,3,0,10" />
-                                        <Button Content="Open Ledgers Directory (Alt+L)" Style="{StaticResource PrimaryButtonStyle}" Height="{StaticResource ButtonHeightDense}"
-                                                Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Grid.Column="2" Background="{StaticResource SurfaceSubtleBrush}" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Padding="12,10">
-                                    <StackPanel>
-                                        <TextBlock Text="Chart of Accounts &amp; Groups (Alt+G)" FontWeight="Bold" Foreground="{StaticResource PrimaryBrandBrush}" />
-                                        <TextBlock Text="Manage 5-nature hierarchical chart of accounts and sub-groups." Style="{StaticResource HelperTextStyle}" Margin="0,3,0,10" />
-                                        <Button Content="Open Account Groups (Alt+G)" Height="{StaticResource ButtonHeightDense}"
-                                                Command="{Binding ManageAccountGroupsCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-
-                        <!-- System Integrity Details -->
-                        <StackPanel Grid.Row="2">
-                            <controls:AccountingSection Title="SYSTEM INTEGRITY &amp; ARCHITECTURE" />
-                            <Border Background="{StaticResource SurfaceSubtleBrush}" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Padding="12,10">
+                            <!-- Card 1: Cash in Hand -->
+                            <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,12">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Architecture: Clean Architecture (.NET 8 WPF)" Style="{StaticResource HelperTextStyle}" Margin="0,0,0,4" />
-                                        <TextBlock Text="Monetary Model: Exact Integer Minor Units (Paise)" Style="{StaticResource HelperTextStyle}" Margin="0,0,0,4" />
-                                        <TextBlock Text="Security: User Authentication &amp; Audit Trail Enabled" Style="{StaticResource HelperTextStyle}" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Text="Database: Microsoft.Data.Sqlite (Raw Parameterized ADO.NET)" Style="{StaticResource HelperTextStyle}" Margin="0,0,0,4" />
-                                        <TextBlock Text="Validation: Domain-Enforced Check Constraints" Style="{StaticResource HelperTextStyle}" Margin="0,0,0,4" />
-                                        <TextBlock Text="Engine Status: Phase 1.1–1.4.5 Certified (124/124 Tests Passing)" Style="{StaticResource HelperTextStyle}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrandBrush}" />
+                                    <Border Grid.Column="0" Width="42" Height="42" CornerRadius="8" Background="{StaticResource SoftBadgeGreenBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconWallet}" Fill="{StaticResource ModernSuccessGreenBrush}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="CASH IN HAND" FontSize="10" FontWeight="Bold" Foreground="#64748B" />
+                                        <DockPanel Margin="0,3,0,1">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding CashBalanceType}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource ModernSuccessGreenBrush}" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                                            <TextBlock Text="{Binding CashBalance, Converter={StaticResource IndianCurrency}}" FontSize="17" FontWeight="Bold" FontFamily="Consolas, Cascadia Mono, Courier New" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                        </DockPanel>
+                                        <TextBlock Text="Physical Cash Balance" FontSize="11" Foreground="#94A3B8" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </StackPanel>
-                    </Grid>
 
-                    <!-- View B: No Company Active Workspace Callout -->
-                    <Grid Visibility="{Binding HasActiveCompany, Converter={StaticResource InverseBoolToVis}}">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520">
-                            <Border Background="{StaticResource GridHeaderBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="18,14" Margin="0,0,0,16">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="BILLSEASY ACCOUNTING WORKSTATION" FontSize="15" FontWeight="Bold" Foreground="{StaticResource PrimaryBrandBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="No active company is currently loaded. Open an existing company or create a new business profile to start accounting operations."
-                                               Style="{StaticResource HelperTextStyle}" TextAlignment="Center" Margin="0,6,0,0" HorizontalAlignment="Center" />
+                            <!-- Card 2: Bank Accounts -->
+                            <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="42" Height="42" CornerRadius="8" Background="{StaticResource SoftBadgeBlueBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconBuilding}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="BANK ACCOUNTS" FontSize="10" FontWeight="Bold" Foreground="#64748B" />
+                                        <DockPanel Margin="0,3,0,1">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding BankBalanceType}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource ModernSuccessGreenBrush}" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                                            <TextBlock Text="{Binding BankBalance, Converter={StaticResource IndianCurrency}}" FontSize="17" FontWeight="Bold" FontFamily="Consolas, Cascadia Mono, Courier New" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                        </DockPanel>
+                                        <TextBlock Text="Reconciled Bank Funds" FontSize="11" Foreground="#94A3B8" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Card 3: Receivables (Debtors) -->
+                            <Border Grid.Column="4" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="42" Height="42" CornerRadius="8" Background="{StaticResource SoftBadgeOrangeBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconUsers}" Fill="{StaticResource SoftBadgeOrangeIconBrush}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="RECEIVABLES (DEBTORS)" FontSize="10" FontWeight="Bold" Foreground="#64748B" />
+                                        <DockPanel Margin="0,3,0,1">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding ReceivablesBalanceType}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource ModernSuccessGreenBrush}" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                                            <TextBlock Text="{Binding ReceivablesBalance, Converter={StaticResource IndianCurrency}}" FontSize="17" FontWeight="Bold" FontFamily="Consolas, Cascadia Mono, Courier New" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                        </DockPanel>
+                                        <TextBlock Text="Outstanding Customer Dues" FontSize="11" Foreground="#94A3B8" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Card 4: Payables (Creditors) -->
+                            <Border Grid.Column="6" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="42" Height="42" CornerRadius="8" Background="{StaticResource SoftBadgeRedBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconTruck}" Fill="{StaticResource ModernDangerRedBrush}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="PAYABLES (CREDITORS)" FontSize="10" FontWeight="Bold" Foreground="#64748B" />
+                                        <DockPanel Margin="0,3,0,1">
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding PayablesBalanceType}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource ModernDangerRedBrush}" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                                            <TextBlock Text="{Binding PayablesBalance, Converter={StaticResource IndianCurrency}}" FontSize="17" FontWeight="Bold" FontFamily="Consolas, Cascadia Mono, Courier New" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                        </DockPanel>
+                                        <TextBlock Text="Supplier Invoices Outstanding" FontSize="11" Foreground="#94A3B8" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- Quick Operations Action-Card Toolbar (Row 2) -->
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,10,0,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Path Data="{StaticResource IconLightning}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Quick Operations" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                        <TextBlock Text="Frequently used transactions and master data" FontSize="11" Foreground="{StaticResource ModernTextSecondaryBrush}" Margin="0,1,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 1. New Purchase Bill (Primary Card) -->
+                                    <Button Grid.Column="0" Style="{StaticResource PrimaryActionCardButtonStyle}"
+                                            Command="{Binding OpenPurchaseInvoiceCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconInvoicePlus}" Fill="#FFFFFF" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                            <TextBlock Grid.Row="1" Text="New Purchase Bill" FontWeight="Bold" FontSize="12.5" Foreground="#FFFFFF" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
+                                            <Border Grid.Row="2" Background="#1D4ED8" CornerRadius="4" Padding="12,2" HorizontalAlignment="Center">
+                                                <TextBlock Text="F9" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF" />
+                                            </Border>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 2. Purchase Register (Secondary Card) -->
+                                    <Button Grid.Column="2" Style="{StaticResource ActionCardButtonStyle}" BorderBrush="#BFDBFE"
+                                            Command="{Binding OpenPurchaseListCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconInvoiceSearch}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                            <TextBlock Grid.Row="1" Text="Purchase Register" FontWeight="Bold" FontSize="12.5" Foreground="{StaticResource ModernTextPrimaryBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
+                                            <Border Grid.Row="2" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="4" Padding="10,2" HorizontalAlignment="Center">
+                                                <TextBlock Text="Shift + F9" FontWeight="Bold" FontSize="10" Foreground="{StaticResource ModernPrimaryBlueBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 3. Payment Voucher (Phase 2) -->
+                                    <Button Grid.Column="4" Style="{StaticResource DisabledActionCardButtonStyle}" ToolTip="Backend accounting logic validated (Class 4). Dedicated UI scheduled for Phase 2.">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconRupee}" Fill="#94A3B8" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                            <TextBlock Grid.Row="1" Text="Payment Voucher" FontWeight="SemiBold" FontSize="11.5" Foreground="#64748B" TextWrapping="Wrap" TextAlignment="Center" />
+                                            <TextBlock Grid.Row="2" Text="F5" FontSize="10" Foreground="#94A3B8" TextAlignment="Center" Margin="0,2,0,4" />
+                                            <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+                                                <TextBlock Text="Backend Validated" FontSize="9" Foreground="#94A3B8" TextAlignment="Center" Margin="0,0,0,2" />
+                                                <Border Background="#F1F5F9" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="3" Padding="6,1" HorizontalAlignment="Center">
+                                                    <TextBlock Text="UI Phase 2" FontSize="9" Foreground="#94A3B8" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 4. Receipt Voucher (Phase 2) -->
+                                    <Button Grid.Column="6" Style="{StaticResource DisabledActionCardButtonStyle}" ToolTip="Backend accounting logic validated (Class 5). Dedicated UI scheduled for Phase 2.">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconReceipt}" Fill="#94A3B8" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                            <TextBlock Grid.Row="1" Text="Receipt Voucher" FontWeight="SemiBold" FontSize="11.5" Foreground="#64748B" TextWrapping="Wrap" TextAlignment="Center" />
+                                            <TextBlock Grid.Row="2" Text="F6" FontSize="10" Foreground="#94A3B8" TextAlignment="Center" Margin="0,2,0,4" />
+                                            <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+                                                <TextBlock Text="Backend Validated" FontSize="9" Foreground="#94A3B8" TextAlignment="Center" Margin="0,0,0,2" />
+                                                <Border Background="#F1F5F9" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="3" Padding="6,1" HorizontalAlignment="Center">
+                                                    <TextBlock Text="UI Phase 2" FontSize="9" Foreground="#94A3B8" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 5. Journal Voucher (Phase 2) -->
+                                    <Button Grid.Column="8" Style="{StaticResource DisabledActionCardButtonStyle}" ToolTip="Backend accounting logic validated (Class 6). Dedicated UI scheduled for Phase 2.">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconJournal}" Fill="#94A3B8" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                            <TextBlock Grid.Row="1" Text="Journal Voucher" FontWeight="SemiBold" FontSize="11.5" Foreground="#64748B" TextWrapping="Wrap" TextAlignment="Center" />
+                                            <TextBlock Grid.Row="2" Text="F7" FontSize="10" Foreground="#94A3B8" TextAlignment="Center" Margin="0,2,0,4" />
+                                            <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+                                                <TextBlock Text="Backend Validated" FontSize="9" Foreground="#94A3B8" TextAlignment="Center" Margin="0,0,0,2" />
+                                                <Border Background="#F1F5F9" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="3" Padding="6,1" HorizontalAlignment="Center">
+                                                    <TextBlock Text="UI Phase 2" FontSize="9" Foreground="#94A3B8" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 6. Stock Items (Active Master Card) -->
+                                    <Button Grid.Column="10" Style="{StaticResource ActionCardButtonStyle}" BorderBrush="#A7F3D0"
+                                            Command="{Binding ManageItemsCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconBox}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                            <TextBlock Grid.Row="1" Text="Stock Items" FontWeight="Bold" FontSize="12.5" Foreground="{StaticResource ModernTextPrimaryBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
+                                            <Border Grid.Row="2" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="4" Padding="10,2" HorizontalAlignment="Center">
+                                                <TextBlock Text="Alt + P" FontWeight="Bold" FontSize="10" Foreground="{StaticResource ModernSuccessGreenBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 7. Ledgers Master (Active Master Card) -->
+                                    <Button Grid.Column="12" Style="{StaticResource ActionCardButtonStyle}" BorderBrush="#DDD6FE"
+                                            Command="{Binding ManageLedgersCommand}" CommandParameter="{Binding ElementName=RootWindow}">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Path Grid.Row="0" Data="{StaticResource IconUsers}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                            <TextBlock Grid.Row="1" Text="Ledgers Master" FontWeight="Bold" FontSize="12.5" Foreground="{StaticResource ModernTextPrimaryBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
+                                            <Border Grid.Row="2" Background="#F5F3FF" BorderBrush="#DDD6FE" BorderThickness="1" CornerRadius="4" Padding="10,2" HorizontalAlignment="Center">
+                                                <TextBlock Text="Alt + L" FontWeight="Bold" FontSize="10" Foreground="{StaticResource ModernPurpleBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Inventory Snapshot (Row 3) -->
+                        <Border Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,10,0,0">
+                            <StackPanel>
+                                <DockPanel LastChildFill="True" Margin="0,0,0,8">
+                                    <Button DockPanel.Dock="Right" Command="{Binding ManageItemsCommand}" CommandParameter="{Binding ElementName=RootWindow}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="View All Items (Alt+P)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource ModernPrimaryBlueBrush}" />
+                                            <Path Data="{StaticResource IconArrowRight}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="10" Height="10" Stretch="Uniform" Margin="4,2,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconBox}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Inventory Snapshot (Live Physical Closing Stock)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ModernTextPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <DataGrid ItemsSource="{Binding InventorySnapshot}"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          IsReadOnly="True"
+                                          MaxHeight="180"
+                                          BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ITEM NAME" Binding="{Binding Name}" Width="2*" FontWeight="SemiBold" />
+                                        <DataGridTextColumn Header="ITEM CODE / SKU" Binding="{Binding Code}" Width="*" Foreground="{StaticResource ModernTextSecondaryBrush}" />
+                                        <DataGridTemplateColumn Header="CLOSING STOCK QTY" Width="140">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Quantity, StringFormat='{}{0:#,##0.##}'}"
+                                                               FontFamily="Consolas, Cascadia Mono, Courier New"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Right"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,12,0"
+                                                               Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="UNIT" Binding="{Binding UnitName}" Width="80">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTemplateColumn Header="STATUS" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#DCFCE7"
+                                                            BorderBrush="#86EFAC"
+                                                            BorderThickness="1"
+                                                            CornerRadius="10"
+                                                            Padding="8,2"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="● " FontSize="8" Foreground="#15803D" VerticalAlignment="Center" />
+                                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="#15803D" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- System Integrity & Database Validation (Row 4) -->
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Card A: System Integrity -->
+                            <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,10">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Path Data="{StaticResource IconGear}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="System Integrity &amp; Architecture" FontWeight="Bold" FontSize="13" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                    </StackPanel>
+                                    <TextBlock Text="Architecture: Clean Architecture (.NET 8 WPF)  |  Monetary Model: Exact Integer Minor Units (Paise) — No Float Drift" FontSize="11" Foreground="{StaticResource ModernTextSecondaryBrush}" Margin="0,0,0,2" TextWrapping="Wrap" />
+                                    <TextBlock Text="Security: User Authentication &amp; Audit Trail Enabled" FontSize="11" Foreground="{StaticResource ModernTextSecondaryBrush}" />
                                 </StackPanel>
                             </Border>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                                <Button Content="_Open Company (Alt+O)" Style="{StaticResource PrimaryButtonStyle}" Width="200" Height="30" Margin="0,0,12,0"
-                                        Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
-                                <Button Content="_Create Company (Alt+N)" Width="200" Height="30"
-                                        Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+                            <!-- Card B: Database & Validation -->
+                            <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="14,10">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Path Data="{StaticResource IconDatabase}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Database &amp; Validation" FontWeight="Bold" FontSize="13" Foreground="{StaticResource ModernTextPrimaryBrush}" />
+                                    </StackPanel>
+                                    <TextBlock Text="Database: Microsoft.Data.Sqlite (Raw Parameterized ADO.NET)" FontSize="11" Foreground="{StaticResource ModernTextSecondaryBrush}" Margin="0,0,0,2" />
+                                    <TextBlock Text="Validation: Domain-Enforced Check Constraints &amp; Bill-Wise Allocation" FontSize="11" Foreground="{StaticResource ModernTextSecondaryBrush}" Margin="0,0,0,2" />
+                                    <TextBlock Text="Engine Status: Classes 1–8 Certified (381/381 Tests Passing)" FontWeight="Bold" FontSize="11" Foreground="{StaticResource ModernSuccessGreenBrush}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- View B: No Company Active Workspace Callout -->
+                <Grid Visibility="{Binding HasActiveCompany, Converter={StaticResource InverseBoolToVis}}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520">
+                        <Border Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="24,20" Margin="0,0,0,16">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Width="48" Height="48" CornerRadius="24" Background="{StaticResource SoftBadgeBlueBrush}" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <Path Data="{StaticResource IconBuilding}" Fill="{StaticResource ModernPrimaryBlueBrush}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="BILLSEASY ACCOUNTING WORKSTATION" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ModernTextPrimaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="No active company is currently loaded. Open an existing company or create a new business profile to start accounting operations."
+                                           FontSize="12" Foreground="{StaticResource ModernTextSecondaryBrush}" TextAlignment="Center" Margin="0,6,0,0" HorizontalAlignment="Center" TextWrapping="Wrap" />
                             </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+                            <Button Content="_Open Company (Alt+O)" Style="{StaticResource PrimaryButtonStyle}" Width="200" Height="34" Margin="0,0,12,0"
+                                    Command="{Binding OpenCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
+                            <Button Content="_Create Company (Alt+N)" Width="200" Height="34"
+                                    Command="{Binding CreateCompanyCommand}" CommandParameter="{Binding ElementName=RootWindow}" />
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
                 </Grid>
-            </Border>
+            </Grid>
         </Grid>
 
-        <!-- Function Key Shortcut Bar -->
-        <Border Grid.Row="3" Background="{StaticResource ShortcutBarBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="0,1,0,0" Padding="12,4">
+        <!-- Function Key Shortcut Bar (Row 3) -->
+        <Border Grid.Row="3" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="14,6">
             <DockPanel LastChildFill="True">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="[Alt+O] Open Co" Style="{StaticResource ShortcutLegendStyle}" FontWeight="SemiBold" Margin="0,0,14,0" />
-                    <TextBlock Text="[Alt+N] New Co" Style="{StaticResource ShortcutLegendStyle}" FontWeight="SemiBold" Margin="0,0,14,0" />
-                    <TextBlock Text="[Alt+L] Ledgers" Style="{StaticResource ShortcutLegendStyle}" FontWeight="SemiBold" Margin="0,0,14,0" />
-                    <TextBlock Text="[Alt+G] Groups" Style="{StaticResource ShortcutLegendStyle}" FontWeight="SemiBold" Margin="0,0,14,0" />
-                    <TextBlock Text="[Alt+F] FY" Style="{StaticResource ShortcutLegendStyle}" FontWeight="SemiBold" Margin="0,0,14,0" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Active: " FontSize="11" Foreground="#64748B" />
+                    <TextBlock Text="{Binding ActiveCompanyText}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ModernPrimaryBlueBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="FY: " FontSize="11" Foreground="#64748B" />
+                    <TextBlock Text="{Binding ActiveFinancialYearText}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ModernTextPrimaryBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="User: " FontSize="11" Foreground="#64748B" />
+                    <TextBlock Text="system_admin" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ModernTextPrimaryBrush}" />
                 </StackPanel>
-                <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Right" Style="{StaticResource HelperTextStyle}" FontWeight="Medium" Foreground="{StaticResource PrimaryBrandBrush}" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Alt+O Open" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="Alt+N New" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="Alt+L Ledgers" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="Alt+P Items" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="F9 Purchase" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="Shift+F9 Register" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                    <TextBlock Text="|" FontSize="11" Foreground="#CBD5E1" Margin="0,0,10,0" />
+                    <TextBlock Text="Alt+R Refresh" FontSize="11" Foreground="#64748B" FontWeight="Medium" Margin="0,0,10,0" />
+                </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- Bottom System Status Bar -->
+        <!-- Bottom System Status Bar (Row 4) -->
         <controls:AccountingStatusBar Grid.Row="4"
                                       StatusMessage="{Binding StatusMessage}"
                                       ActiveCompany="{Binding ActiveCompanyText}"
                                       ActiveFinancialYear="{Binding ActiveFinancialYearText}"
                                       CurrentUser="system_admin"
-                                      VersionTag="BillsEasy 1.4.5" />
+                                      VersionTag="BillsEasy 1.8" />
     </Grid>
 </Window>

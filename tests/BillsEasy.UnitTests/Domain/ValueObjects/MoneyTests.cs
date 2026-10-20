@@ -215,4 +215,62 @@ public class MoneyTests
         total.Amount.Should().Be(0.30m);
         total.ToMinorUnits().Should().Be(30L);
     }
+
+    [Fact]
+    public void RepeatedAddition_ManyPaise_PreservesExactArithmeticWithoutDrift()
+    {
+        var unit = new Money(0.01m);
+        var sum = Money.Zero();
+
+        for (int i = 0; i < 1000; i++)
+        {
+            sum += unit;
+        }
+
+        sum.Amount.Should().Be(10.00m);
+        sum.ToMinorUnits().Should().Be(1000L);
+    }
+
+    [Fact]
+    public void ZeroSafety_OperationsWithZero_PreservesValuesAndCurrency()
+    {
+        var zero = Money.Zero();
+        var positive = new Money(500.50m);
+
+        (positive + zero).Should().Be(positive);
+        (positive - zero).Should().Be(positive);
+        (zero + positive).Should().Be(positive);
+        (zero - positive).Amount.Should().Be(-500.50m);
+        (positive * 0m).Should().Be(zero);
+        (0m * positive).Should().Be(zero);
+        (-zero).Amount.Should().Be(0m);
+    }
+
+    [Fact]
+    public void NegativeMoney_BehavesCorrectlyInComparisonsAndArithmetic()
+    {
+        var debit = new Money(100m);
+        var credit = new Money(250m);
+
+        var balance = debit - credit; // Negative balance: -150.00
+        balance.Amount.Should().Be(-150.00m);
+        balance.IsNegative.Should().BeTrue();
+        balance.IsPositive.Should().BeFalse();
+        balance.IsZero.Should().BeFalse();
+        balance.ToMinorUnits().Should().Be(-15000L);
+
+        // Comparisons
+        (balance < Money.Zero()).Should().BeTrue();
+        (balance < debit).Should().BeTrue();
+        (Money.Zero() > balance).Should().BeTrue();
+
+        // Roundtrip from negative minor units
+        var reconstructed = Money.FromMinorUnits(-15000L);
+        reconstructed.Should().Be(balance);
+        reconstructed.Amount.Should().Be(-150.00m);
+
+        // Abs
+        balance.Abs().Should().Be(new Money(150m));
+    }
 }
+

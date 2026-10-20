@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using BillsEasy.Application.Common.Interfaces;
+using BillsEasy.Domain.Common;
 using BillsEasy.Domain.Entities;
 using BillsEasy.Domain.Enums;
 using Microsoft.Data.Sqlite;
@@ -199,11 +200,61 @@ public class CompanyRepository : ICompanyRepository
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var connection = (SqliteConnection)await _connectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM Companies WHERE Id = @Id;";
-        cmd.Parameters.AddWithValue("@Id", id.ToString());
-        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        try
+        {
+            string? companyName = null;
+            await using (var nameCmd = connection.CreateCommand())
+            {
+                nameCmd.Transaction = (SqliteTransaction)transaction;
+                nameCmd.CommandText = "SELECT CompanyName FROM Companies WHERE Id = @Id;";
+                nameCmd.Parameters.AddWithValue("@Id", id.ToString());
+                var nameResult = await nameCmd.ExecuteScalarAsync(cancellationToken);
+                if (nameResult != null && nameResult != DBNull.Value)
+                {
+                    companyName = nameResult.ToString();
+                }
+            }
+
+            // Atomically check if transactions exist inside this exact transaction/connection
+            await using (var checkCmd = connection.CreateCommand())
+            {
+                checkCmd.Transaction = (SqliteTransaction)transaction;
+                checkCmd.CommandText = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Vouchers';";
+                var tableCount = Convert.ToInt64(await checkCmd.ExecuteScalarAsync(cancellationToken));
+                if (tableCount > 0)
+                {
+                    await using var txCmd = connection.CreateCommand();
+                    txCmd.Transaction = (SqliteTransaction)transaction;
+                    txCmd.CommandText = @"
+                        SELECT COUNT(1) FROM Vouchers v
+                        INNER JOIN FinancialYears fy ON v.FinancialYearId = fy.Id
+                        WHERE fy.CompanyId = @CompanyId;
+                    ";
+                    txCmd.Parameters.AddWithValue("@CompanyId", id.ToString());
+                    var txCount = Convert.ToInt64(await txCmd.ExecuteScalarAsync(cancellationToken));
+                    if (txCount > 0)
+                    {
+                        var nameDisplay = companyName ?? id.ToString();
+                        throw new DomainException($"Cannot delete company '{nameDisplay}' because it has one or more recorded financial transactions / vouchers.");
+                    }
+                }
+            }
+
+            await using var cmd = connection.CreateCommand();
+            cmd.Transaction = (SqliteTransaction)transaction;
+            cmd.CommandText = "DELETE FROM Companies WHERE Id = @Id;";
+            cmd.Parameters.AddWithValue("@Id", id.ToString());
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     private static Company ReadCompany(DbDataReader reader)

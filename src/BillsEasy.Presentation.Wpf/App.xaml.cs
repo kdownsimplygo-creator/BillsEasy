@@ -50,15 +50,30 @@ public partial class App : System.Windows.Application
             var services = new ServiceCollection();
 
             // 1. Storage Location
-            var appDataDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "BillsEasy");
-            if (!Directory.Exists(appDataDir))
+            var envDbPath = Environment.GetEnvironmentVariable("BILLSEASY_DB_PATH");
+            string dbPath;
+            if (!string.IsNullOrWhiteSpace(envDbPath))
             {
-                Directory.CreateDirectory(appDataDir);
+                dbPath = envDbPath.Trim();
+                var dbDir = Path.GetDirectoryName(dbPath);
+                if (!string.IsNullOrWhiteSpace(dbDir) && !Directory.Exists(dbDir))
+                {
+                    Directory.CreateDirectory(dbDir);
+                }
+            }
+            else
+            {
+                var appDataDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "BillsEasy");
+                if (!Directory.Exists(appDataDir))
+                {
+                    Directory.CreateDirectory(appDataDir);
+                }
+
+                dbPath = Path.Combine(appDataDir, "billseasy.db");
             }
 
-            var dbPath = Path.Combine(appDataDir, "billseasy.db");
             var connectionString = $"Data Source={dbPath}";
             Log($"Database path: {dbPath}");
 
@@ -69,6 +84,14 @@ public partial class App : System.Windows.Application
             services.AddSingleton<IFinancialYearRepository, FinancialYearRepository>();
             services.AddSingleton<IAccountGroupRepository, AccountGroupRepository>();
             services.AddSingleton<ILedgerRepository, LedgerRepository>();
+            services.AddSingleton<IVoucherRepository, VoucherRepository>();
+            services.AddSingleton<IBillReferenceRepository, BillReferenceRepository>();
+            services.AddSingleton<IBillAllocationRepository, BillAllocationRepository>();
+            services.AddSingleton<IUnitRepository, UnitRepository>();
+            services.AddSingleton<IItemGroupRepository, ItemGroupRepository>();
+            services.AddSingleton<IItemRepository, ItemRepository>();
+            services.AddSingleton<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
+            services.AddSingleton<IStockMovementRepository, StockMovementRepository>();
             services.AddSingleton<ICurrentUserService, StandaloneCurrentUserService>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddSingleton<ICompanyContextService, CompanyContextService>();
@@ -78,12 +101,31 @@ public partial class App : System.Windows.Application
             services.AddTransient<AccountGroupService>();
             services.AddTransient<ILedgerService, LedgerService>();
             services.AddTransient<LedgerService>();
+            services.AddTransient<IUnitService, UnitService>();
+            services.AddTransient<UnitService>();
+            services.AddTransient<IItemGroupService, ItemGroupService>();
+            services.AddTransient<ItemGroupService>();
+            services.AddTransient<IItemService, ItemService>();
+            services.AddTransient<ItemService>();
+            services.AddTransient<IPostingService, PostingService>();
+            services.AddTransient<PostingService>();
+            services.AddTransient<IBillWiseService, BillWiseService>();
+            services.AddTransient<BillWiseService>();
+            services.AddTransient<IPurchaseService, PurchaseService>();
+            services.AddTransient<PurchaseService>();
             services.AddTransient<CompanyService>();
             services.AddTransient<FinancialYearService>();
+            services.AddTransient<ILedgerBalanceService, LedgerBalanceService>();
+            services.AddTransient<LedgerBalanceService>();
 
             // 4. Register ViewModels & Views
             services.AddTransient<AccountGroupListViewModel>();
             services.AddTransient<LedgerListViewModel>();
+            services.AddTransient<UnitListViewModel>();
+            services.AddTransient<ItemGroupListViewModel>();
+            services.AddTransient<ItemListViewModel>();
+            services.AddTransient<PurchaseInvoiceEditViewModel>();
+            services.AddTransient<PurchaseInvoiceListViewModel>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
 
@@ -95,14 +137,77 @@ public partial class App : System.Windows.Application
             dbInit.InitializeAsync().GetAwaiter().GetResult();
             Log("Database schema initialized.");
 
+            var autoOpenCompany = Environment.GetEnvironmentVariable("BILLSEASY_AUTO_OPEN_COMPANY");
+            if (!string.IsNullOrWhiteSpace(autoOpenCompany))
+            {
+                try
+                {
+                    var companyRepo = ServiceProvider.GetRequiredService<ICompanyRepository>();
+                    var companies = companyRepo.GetAllAsync().GetAwaiter().GetResult();
+                    var match = System.Linq.Enumerable.FirstOrDefault(companies, c => c.CompanyName.Equals(autoOpenCompany.Trim(), StringComparison.OrdinalIgnoreCase))
+                                ?? System.Linq.Enumerable.FirstOrDefault(companies, c => c.CompanyName.IndexOf(autoOpenCompany.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)
+                                ?? System.Linq.Enumerable.FirstOrDefault(companies);
+                    if (match != null)
+                    {
+                        var contextService = ServiceProvider.GetRequiredService<ICompanyContextService>();
+                        contextService.SetActiveContext(match);
+                        Log($"Auto-opened company '{match.CompanyName}' (Id: {match.Id})");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"Auto-open company failed: {ex}");
+                }
+            }
+
             // 6. Launch Main Window
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            var mainVm = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            mainWindow.DataContext = mainVm;
             MainWindow = mainWindow;
             mainWindow.Loaded += (s, ev) => Log("MainWindow.Loaded event fired.");
             mainWindow.Activated += (s, ev) => Log("MainWindow.Activated event fired.");
             mainWindow.Closing += (s, ev) => Log($"MainWindow.Closing event fired (Cancel={ev.Cancel}).");
             mainWindow.Closed += (s, ev) => Log("MainWindow.Closed event fired.");
+
+            var screenshotPath = Environment.GetEnvironmentVariable("BILLSEASY_SCREENSHOT_PATH");
+            if (!string.IsNullOrWhiteSpace(screenshotPath))
+            {
+                mainWindow.Loaded += async (s, ev) =>
+                {
+                    if (mainWindow.DataContext is MainWindowViewModel vm)
+                    {
+                        await vm.RefreshDashboardMetricsAsync();
+                    }
+                    await System.Threading.Tasks.Task.Delay(1500);
+                    try
+                    {
+                        mainWindow.UpdateLayout();
+                        var width = Math.Max(1, (int)mainWindow.ActualWidth);
+                        var height = Math.Max(1, (int)mainWindow.ActualHeight);
+                        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                            width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+                        rtb.Render(mainWindow);
+                        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+                        var outDir = Path.GetDirectoryName(screenshotPath.Trim());
+                        if (!string.IsNullOrWhiteSpace(outDir) && !Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+                        using var stream = File.Create(screenshotPath.Trim());
+                        encoder.Save(stream);
+                        Log($"Automated screenshot saved to: {screenshotPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Automated screenshot error: {ex}");
+                    }
+
+                    if (Environment.GetEnvironmentVariable("BILLSEASY_EXIT_AFTER_SCREENSHOT") == "1")
+                    {
+                        Shutdown();
+                    }
+                };
+            }
+
             mainWindow.Show();
             Log($"MainWindow.Show() called. Window IsVisible={mainWindow.IsVisible}, IsLoaded={mainWindow.IsLoaded}, Visibility={mainWindow.Visibility}");
         }

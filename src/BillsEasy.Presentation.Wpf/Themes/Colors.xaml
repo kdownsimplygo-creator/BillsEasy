@@ -43,6 +43,8 @@
     <SolidColorBrush x:Key="WarningBrush" Color="#B45309" />
     <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#FEF3C7" />
     <SolidColorBrush x:Key="ErrorBrush" Color="#B91C1C" />
+    <SolidColorBrush x:Key="ErrorForegroundBrush" Color="#B91C1C" />
+    <SolidColorBrush x:Key="ErrorBorderBrush" Color="#FCA5A5" />
     <SolidColorBrush x:Key="ErrorBackgroundBrush" Color="#FEE2E2" />
     <SolidColorBrush x:Key="InfoBrush" Color="#1D4ED8" />
     <SolidColorBrush x:Key="InfoBackgroundBrush" Color="#DBEAFE" />
@@ -71,5 +73,25 @@
     <SolidColorBrush x:Key="GridAlternateRowBackgroundBrush" Color="#F8FAFC" />
     <SolidColorBrush x:Key="GridSelectedRowBackgroundBrush" Color="#DCEBF7" />
     <SolidColorBrush x:Key="GridSelectedRowForegroundBrush" Color="#0F172A" />
+
+    <!-- Modern UI Palette (from Reference Design Specification) -->
+    <SolidColorBrush x:Key="ModernPrimaryBlueBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="ModernDeepBlueBrush" Color="#1E40AF" />
+    <SolidColorBrush x:Key="ModernLightBlueBrush" Color="#EFF6FF" />
+    <SolidColorBrush x:Key="ModernSuccessGreenBrush" Color="#10B981" />
+    <SolidColorBrush x:Key="ModernPurpleBrush" Color="#8B5CF6" />
+    <SolidColorBrush x:Key="ModernDangerRedBrush" Color="#EF4444" />
+    <SolidColorBrush x:Key="ModernDisabledGrayBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="ModernTextPrimaryBrush" Color="#1F2937" />
+    <SolidColorBrush x:Key="ModernTextSecondaryBrush" Color="#6B7280" />
+    <SolidColorBrush x:Key="ModernNavyHeaderBrush" Color="#0A2540" />
+
+    <!-- Soft Icon Badges -->
+    <SolidColorBrush x:Key="SoftBadgeGreenBrush" Color="#ECFDF5" />
+    <SolidColorBrush x:Key="SoftBadgeBlueBrush" Color="#EFF6FF" />
+    <SolidColorBrush x:Key="SoftBadgeOrangeBrush" Color="#FFF7ED" />
+    <SolidColorBrush x:Key="SoftBadgeOrangeIconBrush" Color="#EA580C" />
+    <SolidColorBrush x:Key="SoftBadgeRedBrush" Color="#FEF2F2" />
+    <SolidColorBrush x:Key="SoftBadgePurpleBrush" Color="#F5F3FF" />
 
 </ResourceDictionary>

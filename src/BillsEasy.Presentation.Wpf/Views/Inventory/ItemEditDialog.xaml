@@ -1,0 +1,246 @@
+<Window x:Class="BillsEasy.Presentation.Wpf.Views.Inventory.ItemEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:BillsEasy.Presentation.Wpf.Controls"
+        xmlns:behaviors="clr-namespace:BillsEasy.Presentation.Wpf.Behaviors"
+        Title="{Binding DialogTitle}"
+        Height="540" Width="680"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource WindowBackgroundBrush}"
+        ResizeMode="NoResize"
+        behaviors:KeyboardNavigationBehavior.IsAutoAdvanceEnabled="True"
+        behaviors:KeyboardNavigationBehavior.InitialFocusElement="{Binding ElementName=ItemNameTextBox}">
+    <Window.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding SaveCommand}" />
+    </Window.InputBindings>
+
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Standard Accounting Header -->
+        <controls:AccountingDialogHeader Grid.Row="0"
+                                         Title="{Binding DialogTitle}"
+                                         Subtitle="Configure stock item definition, measurement, opening balance, pricing, and controls."
+                                         EntityBadge="[Inventory]" />
+
+        <!-- Tabbed Master Form Body -->
+        <TabControl Grid.Row="1" Margin="0,0,0,6">
+            <!-- TAB 1: BASIC & MEASUREMENT -->
+            <TabItem Header="_1. Basic &amp; Units">
+                <Border Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Item Identification -->
+                            <controls:AccountingSection Title="ITEM IDENTIFICATION" />
+                            <Grid Margin="0,2,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Item Name *" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="0" Grid.Column="1" x:Name="ItemNameTextBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Print Name" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PrintName, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Item Code / SKU" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Status" Style="{StaticResource FormLabelStyle}" />
+                                <CheckBox Grid.Row="3" Grid.Column="1" Content="Item is Active for Trading" IsChecked="{Binding IsActive}" Margin="{StaticResource FieldMarginDense}" />
+                            </Grid>
+
+                            <!-- Classification & Units -->
+                            <controls:AccountingSection Title="CLASSIFICATION &amp; MEASUREMENT" />
+                            <Grid Margin="0,2,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Under Item Group *" Style="{StaticResource FormLabelStyle}" />
+                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                          ItemsSource="{Binding GroupOptions}"
+                                          SelectedItem="{Binding SelectedGroup}"
+                                          DisplayMemberPath="Name" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Main Unit *" Style="{StaticResource FormLabelStyle}" />
+                                <ComboBox Grid.Row="1" Grid.Column="1"
+                                          ItemsSource="{Binding UnitOptions}"
+                                          SelectedItem="{Binding SelectedUnit}"
+                                          DisplayMemberPath="Name" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Alternate Unit" Style="{StaticResource FormLabelStyle}" />
+                                <ComboBox Grid.Row="2" Grid.Column="1"
+                                          ItemsSource="{Binding AlternateUnitOptions}"
+                                          SelectedItem="{Binding SelectedAlternateUnit}"
+                                          DisplayMemberPath="Name" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Conversion Factor" Style="{StaticResource FormLabelStyle}" />
+                                <StackPanel Grid.Row="3" Grid.Column="1" Margin="{StaticResource FieldMarginDense}">
+                                    <TextBox Text="{Binding ConversionFactor, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" />
+                                    <TextBlock Text="Multiplier ratio relating Main Unit to Alternate Unit (e.g. 1 Box = 10 Pcs)."
+                                               Style="{StaticResource HelperTextStyle}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+
+            <!-- TAB 2: OPENING STOCK -->
+            <TabItem Header="_2. Opening Stock">
+                <Border Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <controls:AccountingSection Title="OPENING INVENTORY STATE" />
+                            <Grid Margin="0,4,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Opening Quantity" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OpeningStockQuantity, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Opening Rate (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OpeningStockRate, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Opening Value (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="{StaticResource FieldMarginDense}">
+                                    <TextBox Text="{Binding OpeningStockValue, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" />
+                                    <TextBlock Text="Total monetary value of initial stock (auto-defaults to Qty × Rate if 0)."
+                                               Style="{StaticResource HelperTextStyle}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+
+            <!-- TAB 3: PRICING & CONTROLS -->
+            <TabItem Header="_3. Pricing">
+                <Border Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <controls:AccountingSection Title="COMMERCIAL PRICING DEFAULTS" />
+                            <Grid Margin="0,4,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Sales Price (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SalesPrice, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Purchase Price (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PurchasePrice, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="M.R.P. (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Mrp, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Min Sale Price (₹)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding MinSalePrice, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Sale Discount (%)" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding DiscountPercent, UpdateSourceTrigger=PropertyChanged}" Width="150" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+
+            <!-- TAB 4: CONTROLS & METADATA -->
+            <TabItem Header="_4. Controls &amp; Info">
+                <Border Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <controls:AccountingSection Title="CRITICAL INVENTORY THRESHOLDS" />
+                            <Grid Margin="0,4,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Minimum Level" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding MinLevel, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Maximum Level" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxLevel, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Reorder Level" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ReorderLevel, UpdateSourceTrigger=PropertyChanged}" Width="120" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+                            </Grid>
+
+                            <controls:AccountingSection Title="ADDITIONAL DETAILS" />
+                            <Grid Margin="0,4,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Barcode / EAN" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Left" Margin="{StaticResource FieldMarginDense}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Description" Style="{StaticResource FormLabelStyle}" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <!-- Error Message Strip -->
+        <Border Grid.Row="1" VerticalAlignment="Bottom"
+                Background="{StaticResource ErrorBackgroundBrush}" BorderBrush="{StaticResource ErrorBorderBrush}" BorderThickness="1"
+                Padding="8,4" Margin="14,0,14,10"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource ErrorForegroundBrush}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" />
+        </Border>
+
+        <!-- Standard Footer -->
+        <controls:AccountingDialogFooter Grid.Row="2"
+                                         SaveCommand="{Binding SaveCommand}"
+                                         Margin="0,8,0,0" />
+    </Grid>
+</Window>

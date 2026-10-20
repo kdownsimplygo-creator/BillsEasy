@@ -18,7 +18,7 @@ Prior to initiating Phase 1.5 (Voucher Engine, Double-Entry Posting, and Transac
 3. **`Ledger` Default `Money` Construction Safety:**  
    Identified that in C#, `readonly struct Money` defaults to `Currency = null` when uninitialized (`default(Money)`). This caused optional constructor parameters (`Money openingBalance = default`) to leave newly instantiated `Ledger` entities in an invalid state where equality with `Money.Zero()` failed and arithmetic operations threw currency mismatch exceptions. Hardened `Ledger` constructor and update methods to safely normalize any default/empty `Money` values to semantic `Money.Zero()`.
 
-**Outcome:** All 3 issues have been resolved. The solution builds with 0 Errors and 0 Warnings. Test suite expanded from 124 to **136 tests** (104 Unit Tests, 32 Integration Tests), passing with 100% success.
+**Outcome:** All 3 issues have been resolved. The solution builds with 0 Errors and 0 Warnings. Following Pre-Phase-1.5 hardening, Phase 1.5-A hardening, and the Pre-Phase-1.5-B race-window remediation, the test suite stands at **155 tests** (111 Unit Tests, 44 Integration Tests), passing with 100% success.
 
 ---
 
@@ -202,23 +202,24 @@ When a `Ledger` was instantiated without an explicit opening balance:
 ---
 
 ## 7. Regression Results
-
-Verification command executed:
-```powershell
-dotnet build BillsEasy.sln -c Release
-dotnet test BillsEasy.sln -c Release
-```
-
-### Build Status
-- **Build Status:** SUCCESS
-- **Compiler Warnings:** `0`
-- **Compiler Errors:** `0`
-
-### Test Suite Results
-- **Unit Tests:** `108 passed` (was 99, +9 added)
-- **Integration Tests:** `35 passed` (was 25, +10 test execution runs added across facts/theories)
-- **Total Tests Passing:** `143 passed` (was 124 baseline, 100% success rate)
-- **Failures / Skipped:** `0`
+ 
+ Verification commands executed:
+ ```powershell
+ dotnet build BillsEasy.sln -c Release
+ dotnet test BillsEasy.sln -c Release
+ ```
+- **Timestamp:** 2026-09-15 11:11:05 +05:30
+ 
+ ### Build Status
+ - **Build Status:** SUCCESS
+ - **Compiler Warnings:** `0`
+ - **Compiler Errors:** `0`
+ 
+ ### Test Suite Results
+ - **Unit Tests (`BillsEasy.UnitTests.dll`):** `111 passed` (0 failed, 0 skipped)
+ - **Integration Tests (`BillsEasy.IntegrationTests.dll`):** `44 passed` (0 failed, 0 skipped)
+ - **Total Tests Passing:** `155 passed` (100% success rate)
+ - **Failures / Skipped:** `0`
 
 ---
 

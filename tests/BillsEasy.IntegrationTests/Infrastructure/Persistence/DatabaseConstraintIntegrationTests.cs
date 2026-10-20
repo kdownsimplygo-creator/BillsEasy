@@ -411,6 +411,153 @@ public class DatabaseConstraintIntegrationTests : IDisposable
             .Where(ex => ex.SqliteErrorCode == 19);
     }
 
+    [Fact]
+    public async Task FinancialYears_MultipleCompanies_CanEachHaveTheirOwnActiveFinancialYear()
+    {
+        await _initializer.InitializeAsync();
+        await using var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync();
+
+        var company1Id = Guid.NewGuid().ToString();
+        var company2Id = Guid.NewGuid().ToString();
+
+        // Seed Company 1 and Company 2
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT INTO Companies (Id, CompanyName, PrintName, StateName, StateCode, FinancialYearBeginning, BooksBeginningFrom, CreatedAt, CreatedBy)
+                VALUES (@C1, 'Company One', 'Company One', 'Gujarat', '24', '2026-04-01', '2026-04-01', '2026-04-01T00:00:00Z', 'admin');
+
+                INSERT INTO Companies (Id, CompanyName, PrintName, StateName, StateCode, FinancialYearBeginning, BooksBeginningFrom, CreatedAt, CreatedBy)
+                VALUES (@C2, 'Company Two', 'Company Two', 'Maharashtra', '27', '2026-04-01', '2026-04-01', '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@C1", company1Id);
+            cmd.Parameters.AddWithValue("@C2", company2Id);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // Active FY for Company 1
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Id, @CompanyId, 'FY 2026-27', '2026-04-01', '2027-03-31', 1, '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@Id", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@CompanyId", company1Id);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // Active FY for Company 2 (must succeed without conflict because CompanyId is distinct)
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Id, @CompanyId, 'FY 2026-27', '2026-04-01', '2027-03-31', 1, '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@Id", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@CompanyId", company2Id);
+            var result = await cmd.ExecuteNonQueryAsync();
+            result.Should().Be(1);
+        }
+    }
+
+    [Fact]
+    public async Task FinancialYears_MultipleInactiveFinancialYears_SameCompany_CanCoexist()
+    {
+        await _initializer.InitializeAsync();
+        await using var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync();
+
+        var companyId = Guid.NewGuid().ToString();
+
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT INTO Companies (Id, CompanyName, PrintName, StateName, StateCode, FinancialYearBeginning, BooksBeginningFrom, CreatedAt, CreatedBy)
+                VALUES (@CompanyId, 'Multi FY Co', 'Multi FY Co', 'Gujarat', '24', '2026-04-01', '2026-04-01', '2026-04-01T00:00:00Z', 'admin');
+
+                -- Inactive FY 2024-25
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Id1, @CompanyId, 'FY 2024-25', '2024-04-01', '2025-03-31', 0, '2026-04-01T00:00:00Z', 'admin');
+
+                -- Inactive FY 2025-26
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Id2, @CompanyId, 'FY 2025-26', '2025-04-01', '2026-03-31', 0, '2026-04-01T00:00:00Z', 'admin');
+
+                -- Single Active FY 2026-27
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Id3, @CompanyId, 'FY 2026-27', '2026-04-01', '2027-03-31', 1, '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@CompanyId", companyId);
+            cmd.Parameters.AddWithValue("@Id1", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@Id2", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@Id3", Guid.NewGuid().ToString());
+            var affected = await cmd.ExecuteNonQueryAsync();
+            affected.Should().Be(4);
+        }
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(-1)]
+    public async Task Companies_IsSecurityEnabled_CheckConstraint_RejectsNonBoolean(int invalidValue)
+    {
+        await _initializer.InitializeAsync();
+        await using var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync();
+
+        Func<Task> act = async () =>
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO Companies (Id, CompanyName, PrintName, StateName, StateCode, FinancialYearBeginning, BooksBeginningFrom, IsSecurityEnabled, CreatedAt, CreatedBy)
+                VALUES (@Id, 'Security Check Co', 'Security Check Co', 'Gujarat', '24', '2026-04-01', '2026-04-01', @Val, '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@Id", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@Val", invalidValue);
+            await cmd.ExecuteNonQueryAsync();
+        };
+
+        await act.Should().ThrowAsync<SqliteException>()
+            .Where(ex => ex.SqliteErrorCode == 19);
+    }
+
+    [Theory]
+    [InlineData("IsActive", 2)]
+    [InlineData("IsActive", -1)]
+    [InlineData("IsLocked", 2)]
+    [InlineData("IsLocked", -1)]
+    public async Task FinancialYears_BooleanColumns_CheckConstraint_RejectsNonBoolean(string column, int invalidValue)
+    {
+        await _initializer.InitializeAsync();
+        await using var conn = (SqliteConnection)await _connectionFactory.CreateConnectionAsync();
+        var companyId = Guid.NewGuid().ToString();
+
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = @"
+                INSERT INTO Companies (Id, CompanyName, PrintName, StateName, StateCode, FinancialYearBeginning, BooksBeginningFrom, CreatedAt, CreatedBy)
+                VALUES (@CompanyId, 'FY Bool Check Co', 'FY Bool Check Co', 'Gujarat', '24', '2026-04-01', '2026-04-01', '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@CompanyId", companyId);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        Func<Task> act = async () =>
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = $@"
+                INSERT INTO FinancialYears (Id, CompanyId, YearName, StartDate, EndDate, {column}, CreatedAt, CreatedBy)
+                VALUES (@Id, @CompanyId, 'FY Invalid Bool', '2026-04-01', '2027-03-31', @Val, '2026-04-01T00:00:00Z', 'admin');
+            ";
+            cmd.Parameters.AddWithValue("@Id", Guid.NewGuid().ToString());
+            cmd.Parameters.AddWithValue("@CompanyId", companyId);
+            cmd.Parameters.AddWithValue("@Val", invalidValue);
+            await cmd.ExecuteNonQueryAsync();
+        };
+
+        await act.Should().ThrowAsync<SqliteException>()
+            .Where(ex => ex.SqliteErrorCode == 19);
+    }
+
     public void Dispose()
     {
         try
@@ -423,3 +570,4 @@ public class DatabaseConstraintIntegrationTests : IDisposable
         catch { }
     }
 }
+

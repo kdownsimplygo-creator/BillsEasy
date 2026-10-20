@@ -70,3 +70,62 @@
   2. **Immutable Context Snapshotting**: Any Application service orchestrating voucher creation or posting must snapshot `CompanyId` and `FinancialYearId` as plain, immutable local variables at the very beginning of the operation, rather than repeatedly querying `ICompanyContextService` across asynchronous steps.
   3. **FK Strategy for Historical Accounting Preservation**: In the Phase 1.5 schema, `Voucher.FinancialYearId` will enforce `REFERENCES FinancialYears(Id) ON DELETE RESTRICT`. Combined with the `CompanyService.DeleteCompanyAsync` transaction guard, this ensures no company with recorded transactions can ever be deleted or cascade-purged.
 - **Impact**: Guarantees tamper-proof financial year locking, concurrency safety across async service boundaries, and absolute preservation of historical accounting records.
+
+---
+
+### ADR 09: Minimal Database Schema Migration Strategy (SchemaVersion & Versioned Scripts)
+- **Context**: The existing database schema is created via `CREATE TABLE IF NOT EXISTS` in `DatabaseInitializer.cs`. While sufficient for initial table provisioning, `CREATE TABLE IF NOT EXISTS` cannot apply `ALTER TABLE` statements (e.g. adding columns, modifying constraints, or index mutations) against deployed SQLite databases that already contain production master data.
+- **Decision**: When Phase 1.5-B or subsequent phases require modifying existing tables:
+  1. A dedicated metadata table `_SchemaVersion (Version INTEGER PRIMARY KEY, AppliedAt TEXT NOT NULL, Description TEXT NOT NULL)` will be introduced into `DatabaseInitializer`.
+  2. Migrations will be structured as sequentially numbered, idempotent, transactional script steps (e.g., `001_Initial_Foundation.sql`, `002_Add_Vouchers.sql`, etc.) executed within an atomic SQLite transaction.
+  3. No heavyweight ORM or third-party migration packages (such as EF Core Migrations or DbUp) will be added; the runner will remain a zero-dependency, parameterized C# runner using `Microsoft.Data.Sqlite` in `BillsEasy.Infrastructure`.
+  4. Greenfield/test databases will apply all versioned steps from version 0 to current in order, ensuring test databases and deployed customer databases follow the identical evolutionary path.
+- **Impact**: Provides safe, linear schema evolution without data loss or heavyweight dependencies, while deferring actual implementation until the first `ALTER TABLE` is required.
+
+---
+
+### ADR 10: Relational Foreign Key & Cascade Deletion Invariants (Single Source of Truth)
+- **Context**: Independent review and Pre-Phase 1.5 Hardening identified the need for an authoritative, single source of truth governing all relational `ON DELETE` actions across masters and transactional tables in Phase 1.5-B.
+- **Decision**: The following matrix is ratified as the permanent single source of truth for relational delete actions:
+
+| Relationship | Parent Entity | Child Entity | Current FK Action | Planned Phase 1.5 FK Action | Rationale / Invariant |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Company → FinancialYear** | `Companies` | `FinancialYears` | `ON DELETE CASCADE` | `ON DELETE CASCADE` (master setup only) | Financial years are master temporal containers belonging to the company. |
+| **2. Company → AccountGroup** | `Companies` | `AccountGroups` | `ON DELETE CASCADE` | `ON DELETE CASCADE` | Pre-transaction chart of accounts setup cascades on company purge. |
+| **3. Company → Ledger** | `Companies` | `Ledgers` | `ON DELETE CASCADE` | `ON DELETE CASCADE` | Master setup accounts cascade on company deletion *only when clean*. |
+| **4. Group → SubGroup** | `AccountGroups` | `AccountGroups` | `ON DELETE RESTRICT` | `ON DELETE RESTRICT` | Parent groups cannot be deleted if child groups exist. |
+| **5. Group → Ledger** | `AccountGroups` | `Ledgers` | `ON DELETE RESTRICT` | `ON DELETE RESTRICT` | Groups cannot be deleted while referenced by ledgers. |
+| **6. Company → Voucher** | `Companies` | `Vouchers` | *(Phase 1.5)* | **`ON DELETE RESTRICT`** | **CRITICAL:** A company that contains posted transactions can NEVER be silently deleted. |
+| **7. FY → Voucher** | `FinancialYears` | `Vouchers` | *(Phase 1.5)* | **`ON DELETE RESTRICT`** | A financial year containing vouchers can never be deleted or cascade-purged. |
+| **8. Voucher → VoucherLine** | `Vouchers` | `VoucherLines` | *(Phase 1.5)* | **`ON DELETE CASCADE`** | Voucher and its lines form a single atomic transaction aggregate. |
+| **9. Ledger → VoucherLine** | `Ledgers` | `VoucherLines` | *(Phase 1.5)* | **`ON DELETE RESTRICT`** | A ledger referenced in any financial voucher can NEVER be deleted. |
+
+- **Impact**: Guarantees zero historical accounting data loss, prevents cascade-purging companies with active ledger transactions, and strictly defines deletion boundaries before table creation in Phase 1.5-B. (Tracked testing debt for transaction guards documented in `docs/TESTING_DEBT.md`).
+
+---
+
+### ADR 11: Subledger Bill-Wise Accounting Invariants & Lifecycle (Phase 1.6A)
+- **Context**: Phase 1.6 introduces commercial bill-by-bill tracking linked to double-entry general ledger vouchers.
+- **Decision**:
+  1. **Clean Architecture Separation of Responsibilities**:
+     - `BillAllocation` domain entity enforces *intrinsic invariants only* (`Id`, `CompanyId`, `VoucherLineId`, `BillReferenceId` non-empty, `AllocatedAmount > 0`).
+     - `BillWiseService` (Application Layer) is the *primary owner of business invariants*: existence, active status, complete allocation identity, accounting direction, and state-dependent outstanding limits.
+  2. **Allocation Identity Invariant**:
+     $$\text{BillAllocation.CompanyId} == \text{BillReference.CompanyId} == \text{VoucherLine.CompanyId}$$
+     $$\text{BillReference.LedgerId} == \text{settlement VoucherLine.LedgerId}$$
+     Enforced strictly in Application layer; database provides independent relational integrity constraints.
+  3. **Single Source of Truth for Outstanding Balances**:
+     Outstanding balances are computed dynamically as $\text{OriginalAmount} - \sum \text{AllocatedAmount}$ via indexed SQL aggregation. No mutable cached balance columns are stored.
+  4. **Definitive Voucher Cancellation Lifecycle**:
+     - Originating voucher: If active allocations exist, cancellation is rejected with `DomainException`. If zero allocations exist, associated bill is soft-cancelled (`Status = Cancelled`).
+     - Settlement voucher: Cancellation/deletion deletes associated `BillAllocation` records, automatically restoring the source bill's dynamic outstanding balance with zero drift.
+  5. **ADR 10 Deletion Rules Matrix Expansion**:
+     - `Company → BillReference`: `ON DELETE RESTRICT`
+     - `Ledger → BillReference`: `ON DELETE RESTRICT` (verified by `LedgerRepository.HasBillReferencesAsync`)
+     - `VoucherLine → BillReference`: `ON DELETE RESTRICT`
+     - `Company → BillAllocation`: `ON DELETE RESTRICT`
+     - `VoucherLine → BillAllocation`: `ON DELETE CASCADE`
+     - `BillReference → BillAllocation`: `ON DELETE RESTRICT`
+- **Impact**: Clean, robust, drift-free bill-wise accounting fully integrated with the core double-entry engine.
+
+

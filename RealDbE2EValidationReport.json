@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "reportTitle": "BillsEasy Classes 1–8 Real Application Database End-to-End Validation Report",
+  "generatedAt": "2026-09-20T13:57:00+05:30",
+  "status": "PASS",
+  "criticalDefects": 0,
+  "environment": {
+    "targetDatabasePath": "W:\\BillsEasy\\TestData\\E2E\\BillsEasy_RealDB_E2E.db",
+    "wpfDefaultDatabasePath": "C:\\Users\\Kuldipsinh\\AppData\\Local\\BillsEasy\\billseasy.db",
+    "databaseEngine": "SQLite",
+    "sqlitePragmas": {
+      "foreign_keys": "ON",
+      "journal_mode": "WAL"
+    },
+    "diCompositionRoot": "BillsEasy.Presentation.Wpf.App.ConfigureServices Parity (Singletons: Repositories; Transients: Services)",
+    "schemaInitializer": "BillsEasy.Infrastructure.Data.DatabaseInitializer.InitializeAsync",
+    "buildConfiguration": "Release",
+    "targetFramework": "net8.0-windows / net8.0",
+    "compilerWarnings": 0,
+    "compilerErrors": 0
+  },
+  "uiDatabaseParity": {
+    "schemaParity": "IDENTICAL",
+    "serviceRegistrationParity": "IDENTICAL",
+    "dataPathDivergence": "SEPARATED_BY_HARDCODED_PATH",
+    "wpfExecutablePath": "W:\\BillsEasy\\src\\BillsEasy.Presentation.Wpf\\bin\\Debug\\net8.0-windows\\BillsEasy.Presentation.Wpf.exe",
+    "rootCause": "App.xaml.cs lines 53-64 hardcodes %LOCALAPPDATA%\\BillsEasy\\billseasy.db without checking environment variables or appsettings.json.",
+    "recommendations": [
+      "Introduce optional environment variable BILLSEASY_DB_PATH override in App.xaml.cs.",
+      "Support appsettings.json configuration root for connection strings.",
+      "Copy TestData\\E2E\\BillsEasy_RealDB_E2E.db to %LOCALAPPDATA%\\BillsEasy\\billseasy.db for manual UI inspection."
+    ]
+  },
+  "stages": [
+    { "stage": 1, "name": "Company & Financial Year Setup", "status": "PASS", "details": "Created Shree Krishna Electronics (FY 2023-2024)" },
+    { "stage": 2, "name": "Account Masters Creation", "status": "PASS", "details": "Configured 10 Ledgers; Capital credit ₹11,23,000; Freight seeded" },
+    { "stage": 3, "name": "Inventory Masters Setup", "status": "PASS", "details": "Created Units (Pcs, NOS, Box), Groups, and 6 Items" },
+    { "stage": 4, "name": "Master Opening Balances", "status": "PASS", "details": "Entity opening balances verified and balanced" },
+    { "stage": 5, "name": "Opening Stock & Bill References", "status": "PASS", "details": "OPEN-YASHIKA-001 (₹80,000 Cr), OPEN-TECHWORLD-001 (₹45,000 Cr)" },
+    { "stage": 6, "name": "Day 1–3 Purchases", "status": "PASS", "details": "T1 (Yashika ₹68,000), T2 (TechWorld ₹86,000), T3 (Global ₹1,61,500)" },
+    { "stage": 7, "name": "Day 4–5 Payments", "status": "PASS", "details": "T4 (Yashika ₹30,000), T5 (TechWorld ₹50,000) with Bill Allocations" },
+    { "stage": 8, "name": "Day 6–7 Receipts", "status": "PASS", "details": "T6 (Raj ₹40,000 into Bank), T7 (Apex ₹20,000 into Cash)" },
+    { "stage": 9, "name": "Day 8–9 Journal / Payment", "status": "PASS", "details": "T8 (Office Exp ₹12,500), T9 (Bank Charges ₹2,500)" },
+    { "stage": 10, "name": "Day 10 Purchase", "status": "PASS", "details": "T10 (Yashika ₹69,500)" },
+    { "stage": 11, "name": "Comprehensive Reconciliation", "status": "PASS", "details": "Reconciled accounting, cash, bank, debtors, creditors, bills, stock" },
+    { "stage": 12, "name": "Negative Tests (N1–N9)", "status": "PASS", "details": "All 9 invalid scenarios threw DomainException with zero side effects" },
+    { "stage": 13, "name": "Atomicity Rollback Tests", "status": "PASS", "details": "Failure Points A, B, C, D verified 100% rollback across all 6 tables" },
+    { "stage": 14, "name": "Direct SQL Relational Integrity Audit", "status": "PASS", "details": "0 orphan rows, 0 unbalanced vouchers, 0 negative stock" }
+  ],
+  "reconciliations": {
+    "accountingEquality": {
+      "totalDebitPaise": 54000000,
+      "totalCreditPaise": 54000000,
+      "totalDebitRupees": 540000.0,
+      "totalCreditRupees": 540000.0,
+      "imbalance": 0.0,
+      "status": "PASS"
+    },
+    "cash": {
+      "openingBalance": 100000.0,
+      "receipts": 20000.0,
+      "payments": 12500.0,
+      "expectedClosing": 107500.0,
+      "actualClosing": 107500.0,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    "bank": {
+      "openingBalance": 700000.0,
+      "receipts": 40000.0,
+      "payments": 82500.0,
+      "expectedClosing": 657500.0,
+      "actualClosing": 657500.0,
+      "difference": 0.0,
+      "status": "PASS"
+    },
+    "debtors": {
+      "openingReceivable": 125000.0,
+      "receipts": 60000.0,
+      "expectedOutstanding": 65000.0,
+      "actualOutstanding": 65000.0,
+      "breakdown": {
+        "Raj Electronics": 35000.0,
+        "Apex Computers": 30000.0,
+        "Shivam Traders": 0.0
+      },
+      "status": "PASS"
+    },
+    "creditors": {
+      "openingPayable": 125000.0,
+      "purchases": 385000.0,
+      "payments": 80000.0,
+      "expectedOutstanding": 430000.0,
+      "actualOutstanding": 430000.0,
+      "breakdown": {
+        "Yashika Pvt Ltd.": 187500.0,
+        "TechWorld Distributors": 81000.0,
+        "Global Computer Supplies": 161500.0
+      },
+      "status": "PASS"
+    },
+    "billWise": {
+      "totalOriginal": 510000.0,
+      "totalAllocated": 80000.0,
+      "totalOutstanding": 430000.0,
+      "ledgerBalance": 430000.0,
+      "difference": 0.0,
+      "bills": [
+        { "supplier": "Yashika Pvt Ltd.", "reference": "OPEN-YASHIKA-001", "type": "OpeningRef", "original": 80000.0, "allocated": 0.0, "outstanding": 80000.0 },
+        { "supplier": "Yashika Pvt Ltd.", "reference": "PUR/YASH/001", "type": "NewRef", "original": 68000.0, "allocated": 30000.0, "outstanding": 38000.0 },
+        { "supplier": "Yashika Pvt Ltd.", "reference": "PUR/YASH/002", "type": "NewRef", "original": 69500.0, "allocated": 0.0, "outstanding": 69500.0 },
+        { "supplier": "TechWorld Distributors", "reference": "OPEN-TECHWORLD-001", "type": "OpeningRef", "original": 45000.0, "allocated": 0.0, "outstanding": 45000.0 },
+        { "supplier": "TechWorld Distributors", "reference": "PUR/TECH/001", "type": "NewRef", "original": 86000.0, "allocated": 50000.0, "outstanding": 36000.0 },
+        { "supplier": "Global Computer Supplies", "reference": "PUR/GLOB/001", "type": "NewRef", "original": 161500.0, "allocated": 0.0, "outstanding": 161500.0 }
+      ],
+      "status": "PASS"
+    },
+    "physicalInventory": {
+      "items": [
+        { "name": "Samsung M21' Monitor", "unit": "Pcs", "opening": 10.0, "inward": 9.0, "expected": 19.0, "actual": 19.0, "variance": 0.0 },
+        { "name": "Dell 24-inch Monitor", "unit": "Pcs", "opening": 5.0, "inward": 8.0, "expected": 13.0, "actual": 13.0, "variance": 0.0 },
+        { "name": "Lenovo Business Laptop", "unit": "NOS", "opening": 3.0, "inward": 1.0, "expected": 4.0, "actual": 4.0, "variance": 0.0 },
+        { "name": "HP Business Laptop", "unit": "NOS", "opening": 2.0, "inward": 4.0, "expected": 6.0, "actual": 6.0, "variance": 0.0 },
+        { "name": "TP-Link Router", "unit": "Pcs", "opening": 10.0, "inward": 10.0, "expected": 20.0, "actual": 20.0, "variance": 0.0 },
+        { "name": "D-Link 8 Port Switch", "unit": "Pcs", "opening": 5.0, "inward": 5.0, "expected": 10.0, "actual": 10.0, "variance": 0.0 }
+      ],
+      "valuationScopeNotice": "Financial closing stock valuation NOT evaluated (valuation engines outside Classes 1-8 scope); physical quantities 100% verified.",
+      "status": "PASS"
+    }
+  },
+  "sqlIntegrityAudit": {
+    "orphanVoucherLines": 0,
+    "orphanBillReferences": 0,
+    "orphanBillAllocations": 0,
+    "orphanPurchaseInvoiceItemLines": 0,
+    "orphanPurchaseInvoiceSundryLines": 0,
+    "orphanStockMovements": 0,
+    "status": "PASS"
+  },
+  "regressionSummary": {
+    "unitTestsPassed": 273,
+    "unitTestsFailed": 0,
+    "integrationTestsPassed": 95,
+    "integrationTestsFailed": 0,
+    "totalTestsPassed": 368,
+    "totalTestsFailed": 0,
+    "totalTestsSkipped": 0,
+    "status": "PASS"
+  }
+}

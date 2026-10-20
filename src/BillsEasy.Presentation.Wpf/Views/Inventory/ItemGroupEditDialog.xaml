@@ -1,0 +1,79 @@
+<Window x:Class="BillsEasy.Presentation.Wpf.Views.Inventory.ItemGroupEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:BillsEasy.Presentation.Wpf.Controls"
+        xmlns:behaviors="clr-namespace:BillsEasy.Presentation.Wpf.Behaviors"
+        Title="{Binding DialogTitle}"
+        Height="400" Width="550"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource WindowBackgroundBrush}"
+        ResizeMode="NoResize"
+        behaviors:KeyboardNavigationBehavior.IsAutoAdvanceEnabled="True"
+        behaviors:KeyboardNavigationBehavior.InitialFocusElement="{Binding ElementName=GroupNameTextBox}">
+    <Window.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding SaveCommand}" />
+    </Window.InputBindings>
+
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Standard Accounting Header -->
+        <controls:AccountingDialogHeader Grid.Row="0"
+                                         Title="{Binding DialogTitle}"
+                                         Subtitle="Configure inventory category hierarchy."
+                                         EntityBadge="[Inventory]" />
+
+        <!-- Form Body -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="14,10">
+            <StackPanel>
+                <controls:AccountingSection Title="GROUP PROPERTIES" />
+                <Grid Margin="0,8,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Group Name -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Group Name *" Style="{StaticResource FormLabelStyle}" />
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="GroupNameTextBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+
+                    <!-- Parent Group Selector -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Parent Group" Style="{StaticResource FormLabelStyle}" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="{StaticResource FieldMarginDense}">
+                        <ComboBox ItemsSource="{Binding ParentGroupOptions}"
+                                  SelectedItem="{Binding SelectedParentGroup}"
+                                  DisplayMemberPath="Name" />
+                        <TextBlock Text="Leave unselected for top-level root categories."
+                                   Style="{StaticResource HelperTextStyle}" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- Description -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Description" Style="{StaticResource FormLabelStyle}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource FieldMarginDense}" />
+                </Grid>
+
+                <!-- Error Message -->
+                <Border Background="{StaticResource ErrorBackgroundBrush}" BorderBrush="{StaticResource ErrorBorderBrush}" BorderThickness="1"
+                        Padding="8,4" Margin="0,4,0,0"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource ErrorForegroundBrush}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" />
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Standard Footer -->
+        <controls:AccountingDialogFooter Grid.Row="2"
+                                         SaveCommand="{Binding SaveCommand}"
+                                         Margin="0,8,0,0" />
+    </Grid>
+</Window>

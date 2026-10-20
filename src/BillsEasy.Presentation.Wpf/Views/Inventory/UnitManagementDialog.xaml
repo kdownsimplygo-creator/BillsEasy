@@ -1,0 +1,100 @@
+<Window x:Class="BillsEasy.Presentation.Wpf.Views.Inventory.UnitManagementDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:BillsEasy.Presentation.Wpf.Controls"
+        xmlns:behaviors="clr-namespace:BillsEasy.Presentation.Wpf.Behaviors"
+        Title="Units of Measurement Master — Inventory"
+        Height="550" Width="800"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource WindowBackgroundBrush}"
+        behaviors:KeyboardNavigationBehavior.InitialFocusElement="{Binding ElementName=UnitsDataGrid}"
+        x:Name="ManagementWindow">
+    <Window.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding LoadUnitsCommand}" />
+        <KeyBinding Gesture="Alt+A" Command="{Binding AddUnitCommand}" CommandParameter="{Binding ElementName=ManagementWindow}" />
+        <KeyBinding Gesture="Alt+M" Command="{Binding ModifyUnitCommand}" CommandParameter="{Binding ElementName=ManagementWindow}" />
+        <KeyBinding Gesture="Alt+D" Command="{Binding DeleteUnitCommand}" />
+    </Window.InputBindings>
+
+    <Grid Margin="{StaticResource DialogPadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Standard Accounting Header with Search -->
+        <controls:AccountingDialogHeader Grid.Row="0"
+                                         Title="Units of Measurement Master"
+                                         Subtitle="{Binding ActiveCompanyName, StringFormat='Active Company: {0}'}"
+                                         EntityBadge="[Inventory]">
+            <controls:AccountingDialogHeader.HeaderRightContent>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Search:" Style="{StaticResource FormLabelStyle}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="180" Height="{StaticResource ControlHeightDense}" />
+                </StackPanel>
+            </controls:AccountingDialogHeader.HeaderRightContent>
+        </controls:AccountingDialogHeader>
+
+        <!-- Action Toolbar -->
+        <Border Grid.Row="1" Background="{StaticResource ShortcutBarBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="6,3" Margin="0,0,0,6">
+            <DockPanel LastChildFill="False">
+                <Button Content="Add Unit (Alt+A)" Command="{Binding AddUnitCommand}" CommandParameter="{Binding ElementName=ManagementWindow}"
+                        Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,6,0" />
+                <Button Content="Modify (Alt+M)" Command="{Binding ModifyUnitCommand}" CommandParameter="{Binding ElementName=ManagementWindow}"
+                        IsEnabled="{Binding SelectedUnit, Converter={StaticResource NullToBoolConverter}}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,6,0" />
+                <Button Content="Delete (Alt+D)" Command="{Binding DeleteUnitCommand}"
+                        IsEnabled="{Binding SelectedUnit, Converter={StaticResource NullToBoolConverter}}"
+                        Style="{StaticResource DangerButtonStyle}" Margin="0,0,6,0" />
+                <Button Content="Refresh (F5)" Command="{Binding LoadUnitsCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" DockPanel.Dock="Right" />
+            </DockPanel>
+        </Border>
+
+        <!-- Data Grid -->
+        <DataGrid Grid.Row="2"
+                  x:Name="UnitsDataGrid"
+                  ItemsSource="{Binding FilteredUnits}"
+                  SelectedItem="{Binding SelectedUnit}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Unit Name" Binding="{Binding Name}" Width="200" />
+                <DataGridTextColumn Header="Print Name" Binding="{Binding PrintName}" Width="250" />
+                <DataGridTextColumn Header="Decimal Places" Binding="{Binding DecimalPlaces}" Width="120" />
+                <DataGridTextColumn Header="Created At" Binding="{Binding CreatedAt, StringFormat='yyyy-MM-dd'}" Width="120" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Error Message Notification Strip -->
+        <Border Grid.Row="3" Background="{StaticResource ErrorBackgroundBrush}" BorderBrush="{StaticResource ErrorBorderBrush}" BorderThickness="1"
+                Padding="8,4" Margin="0,6,0,0"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource ErrorForegroundBrush}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" />
+        </Border>
+
+        <!-- Footer / Status Bar -->
+        <Border Grid.Row="4" Background="{StaticResource ShortcutBarBackgroundBrush}" BorderBrush="{StaticResource BorderMediumBrush}" BorderThickness="1" Padding="8,4" Margin="0,6,0,0">
+            <DockPanel LastChildFill="False">
+                <TextBlock Text="[Alt+A] Add   •   [Alt+M] Modify   •   [Alt+D] Delete   •   [F5] Refresh   •   [Esc] Close"
+                           FontSize="{StaticResource FontSizeSmall}"
+                           FontWeight="Medium"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           DockPanel.Dock="Left" />
+
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource HelperTextStyle}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Button Content="_Close (Esc)" MinWidth="80" Height="{StaticResource ButtonHeightDense}" IsCancel="True" Click="Close_Click" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

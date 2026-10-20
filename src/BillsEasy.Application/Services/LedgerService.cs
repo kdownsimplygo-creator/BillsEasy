@@ -306,6 +306,46 @@ public class LedgerService : ILedgerService
             seededLedgers.Add(plLedger);
         }
 
+        var purchaseGroup = groups.FirstOrDefault(g => g.Name.Equals("Purchase Accounts", StringComparison.OrdinalIgnoreCase))
+                         ?? groups.FirstOrDefault(g => g.Nature == GroupNature.Expense);
+
+        if (purchaseGroup != null)
+        {
+            var purchaseLedger = Ledger.Create(
+                companyId,
+                purchaseGroup.Id,
+                "Purchase",
+                printName: "Purchase Account",
+                openingBalance: 0m,
+                openingBalanceType: DebitCreditType.Debit,
+                billWiseEnabled: false,
+                isDefaultSystemLedger: true);
+
+            purchaseLedger.CreatedAt = now;
+            purchaseLedger.CreatedBy = createdBy;
+            seededLedgers.Add(purchaseLedger);
+        }
+
+        var freightGroup = groups.FirstOrDefault(g => g.Name.Equals("Indirect Expenses", StringComparison.OrdinalIgnoreCase))
+                        ?? groups.FirstOrDefault(g => g.Nature == GroupNature.Expense);
+
+        if (freightGroup != null)
+        {
+            var freightLedger = Ledger.Create(
+                companyId,
+                freightGroup.Id,
+                "Freight & Forwarding Charges",
+                printName: "Freight & Forwarding Charges",
+                openingBalance: 0m,
+                openingBalanceType: DebitCreditType.Debit,
+                billWiseEnabled: false,
+                isDefaultSystemLedger: true);
+
+            freightLedger.CreatedAt = now;
+            freightLedger.CreatedBy = createdBy;
+            seededLedgers.Add(freightLedger);
+        }
+
         if (seededLedgers.Count > 0)
         {
             await _ledgerRepository.AddRangeAsync(seededLedgers, cancellationToken);
